@@ -36,11 +36,11 @@ public function validateReceiptCheck($input_params=array()){
      $applesharedsecret     = $this->config->item("SUBSCRIPTION_PASSWORD");
     $appleurl              = $this->config->item("SUBSCRIPTION_ITUNES_URL");
     //https://buy.itunes.apple.com/verifyReceipt //for production
-
+/*
     echo "applesharedsecret--".$applesharedsecret."---";
     echo "appleurl--".$appleurl."---";
      var_dump($sample_json);
-    exit;
+    exit;*/
 
     $request = json_encode(array("receipt-data" => $sample_json,"password"=>$applesharedsecret));
     // setting up the curl
@@ -52,7 +52,11 @@ public function validateReceiptCheck($input_params=array()){
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
     $jsonresult = curl_exec($ch);
 
-    
+
+/*    print_r($jsonresult);
+    exit;
+
+    */
 
     $err = curl_error($ch);
     curl_close($ch);
@@ -71,8 +75,7 @@ public function validateReceiptCheck($input_params=array()){
             $expires_date = "";
             $transaction_id = "";
             $product_id = "";
-            
-            
+
             foreach ($decoded_json->latest_receipt_info as $value) {
                  $gmt_date       = $value->expires_date;
                  $date1 = explode(' ',$gmt_date);
@@ -91,18 +94,27 @@ public function validateReceiptCheck($input_params=array()){
                     $product_id = $value->product_id;
                  }
 
+                 
+                 break;
+
             }
-            
-           
-            if(strtotime($expires_date) < strtotime(date("Y-m-d H:i:s")))
+
+
+            if(strtotime($expires_date) < (date("Y-m-d H:i:s")))
             {
+
+                
                 $return_arr[0]['success']        = 0;
                 $return_arr[0]['message']        = 'Your subscription is expired. Please subscribe again to use app features.';    
             }else
             {
+
+                
                 $return_arr[0]['success']        = 1;
                 $return_arr[0]['message']        = 'Subscription purchased successfully.'; 
             }
+
+
             
             
             $return_arr[0]['transaction_id'] = $transaction_id;

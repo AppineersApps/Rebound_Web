@@ -151,7 +151,7 @@ class Get_config_paramaters extends Cit_Controller
             'privacy_policy_updated',
             'terms_conditions_updated',
             'log_status_updated',
-	    'ios_app_id',   
+	    	'ios_app_id',   
             'ios_banner_id',    
             'ios_interstitial_id',  
             'ios_native_id',    
@@ -160,7 +160,12 @@ class Get_config_paramaters extends Cit_Controller
             'android_banner_id',    
             'android_interstitial_id',  
             'android_native_id',    
-            'android_rewarded_id'
+            'android_rewarded_id',
+            'InfluencerCode',
+            'Gender',
+            'IsSubscribed',
+            'SubscriptionId',
+            'offer_date',
         );
         $output_keys = array(
             'get_config_params',

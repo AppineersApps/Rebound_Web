@@ -423,6 +423,64 @@ class Influencer_management_model extends CI_Model
     }
 
     /**
+        getInfluencerRevenew method is used to get monthly revenew if influencer
+    **/
+    public function getInfluencerRevenew($i_influencer_code,$prev_yr)
+    {
+        if($i_influencer_code != "")
+        {
+          
+            $prev_yr3 = $prev_yr."01-01";
+
+    
+                $this->db->select("sum(a.dAmount) as totalRevenew, EXTRACT(YEAR_MONTH FROM a.dtAddedAt) AS YM, DATE_FORMAT(a.dtAddedAt,'%M %Y') AS monthYear, YEAR(a.dtAddedAt) as dataYear");
+                $this->db->from("users_subscription as a");
+                //$this->db->join("users as b","a.iUserId = b.iUserId","left");
+                $this->db->where("a.vInfluencerCode",$i_influencer_code);
+                $this->db->where("dtAddedAt >= ", $prev_yr3);
+               // $this->db->where("YEAR(a.dtAddedAt)","2021");
+                $this->db->group_by("monthYear");
+
+            
+                 $revenew_arr = $this->db->get();
+                //echo $this->db->last_query(); 
+    
+           
+             $data_revenew_arr = is_object($revenew_arr) ? $revenew_arr->result_array() : array();
+
+             $optData = array();
+
+             foreach ($data_revenew_arr as $key => $value) {
+                
+                $optData[$value['dataYear']][] = $value;
+             }
+             // print_r($optData); 
+
+             
+/*
+              foreach ($optData as $key2 => $value2) {
+
+               
+
+                 if($key2 == "2021")
+                 {
+        
+                   foreach ($value2 as $key => $value) {
+                    echo $value['monthYear']."--".$value['totalRevenew']."<br>";
+
+                   }
+
+                 }
+
+                
+              }*/
+
+            return $optData;
+            
+        }
+    }
+
+    /**
      * getListingData method is used to get grid listing data records for this module.
      * @param array $config_arr config_arr for grid listing settigs.
      * @return array $listing_data returns data records array for grid.

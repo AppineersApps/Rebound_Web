@@ -357,6 +357,46 @@ class Send_message extends Cit_Controller
         {
 
             $params_arr = $where_arr = array();
+
+
+             //*******upload doc *******************
+             if (isset($_FILES["upload_doc"]["name"]) && isset($_FILES["upload_doc"]["tmp_name"]))
+            {
+                $sent_file2 = $_FILES["upload_doc"]["name"];
+            }
+            else
+            {
+                $sent_file2 = "";
+            }
+            if (!empty($sent_file2))
+            {
+                list($file_name, $ext) = $this->general->get_file_attributes($sent_file2);
+                $images_arr["upload_doc"]["ext"] = implode(',', $this->config->item('IMAGE_EXTENSION_ARR'));
+                $images_arr["upload_doc"]["size"] = "102400";
+                if ($this->general->validateFileFormat($images_arr["upload_doc"]["ext"], $_FILES["upload_doc"]["name"]))
+                {
+                    if ($this->general->validateFileSize($images_arr["upload_doc"]["size"], $_FILES["upload_doc"]["size"]))
+                    {
+                        $images_arr["upload_doc"]["name"] = $file_name;
+
+                        $folder_name = "rebound/chat_uploads";             
+                
+                        $temp_file = $_FILES["upload_doc"]["tmp_name"];
+                        $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["upload_doc"]["name"]);
+                        if ($upload_arr[0] == "")
+                        {
+                            //file upload failed
+
+                        }
+                    }
+                }
+            }
+
+            if (isset($images_arr["upload_doc"]["name"]))
+            {
+                $params_arr["upload_doc"] = $images_arr["upload_doc"]["name"];
+            }
+            //*******upload doc *******************
             if (isset($input_params["m_message_id"]))
             {
                 $where_arr["m_message_id"] = $input_params["m_message_id"];
@@ -403,6 +443,46 @@ class Send_message extends Cit_Controller
         {
 
             $params_arr = array();
+
+
+             //*******upload doc *******************
+             if (isset($_FILES["upload_doc"]["name"]) && isset($_FILES["upload_doc"]["tmp_name"]))
+            {
+                $sent_file2 = $_FILES["upload_doc"]["name"];
+            }
+            else
+            {
+                $sent_file2 = "";
+            }
+            if (!empty($sent_file2))
+            {
+                list($file_name, $ext) = $this->general->get_file_attributes($sent_file2);
+                $images_arr["upload_doc"]["ext"] = implode(',', $this->config->item('IMAGE_EXTENSION_ARR'));
+                $images_arr["upload_doc"]["size"] = "102400";
+                if ($this->general->validateFileFormat($images_arr["upload_doc"]["ext"], $_FILES["upload_doc"]["name"]))
+                {
+                    if ($this->general->validateFileSize($images_arr["upload_doc"]["size"], $_FILES["upload_doc"]["size"]))
+                    {
+                        $images_arr["upload_doc"]["name"] = $file_name;
+                        $folder_name = "rebound/chat_uploads";             
+                
+                        $temp_file = $_FILES["upload_doc"]["tmp_name"];
+                        $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["upload_doc"]["name"]);
+                        if ($upload_arr[0] == "")
+                        {
+                            //file upload failed
+
+                        }
+                    }
+                }
+            }
+
+            if (isset($images_arr["upload_doc"]["name"]))
+            {
+                $params_arr["upload_doc"] = $images_arr["upload_doc"]["name"];
+            }
+            //*******upload doc *******************
+            
             if (isset($input_params["user_id"]))
             {
                 $params_arr["user_id"] = $input_params["user_id"];
@@ -668,7 +748,7 @@ class Send_message extends Cit_Controller
 
             $device_id = $input_params["r_device_token"];
             $code = "USER";
-            $sound = "";
+            $sound = "default";
             $badge = "";
             $title = "";
             $send_vars = array(

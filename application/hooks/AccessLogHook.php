@@ -151,6 +151,7 @@ class AccessLogHook
         $params_arr = array();
         $date_format = $this->params['log_date_format'];
         $request_type = $this->params['type'];
+
         $request_func = $this->params['function'];
         if (!$date_format) {
             $date_format = "Y-m-d H:i:s";
@@ -162,6 +163,8 @@ class AccessLogHook
         $plat_form = $this->get_platform($user_agent);
         $bowser = $this->get_browser($user_agent);
         $input_params_arr = $this->get_http_request_params();
+        $RequestMethod = $_SERVER['REQUEST_METHOD'];
+
         $input_params_str = (is_array($input_params_arr) && count($input_params_arr) > 0) ? serialize($input_params_arr) : "";
 
         $log_str = <<<EOD
@@ -223,6 +226,8 @@ EOD;
             $data_array['vPlatform']   = $plat_form;
             $data_array['vBrowser']    = $bowser;
             $data_array['vFileName']   = $file_name;
+            $data_array['vRequest_method']   = $RequestMethod;
+            
             $result = $this->CI->db->insert('api_accesslogs', $data_array);
             if($result > 0){
                 $exe_arr['api_log_id']  = $result;
@@ -272,7 +277,8 @@ EOD;
             '/ipad/i' => 'iPad',
             '/android/i' => 'Android',
             '/blackberry/i' => 'BlackBerry',
-            '/webos/i' => 'Mobile'
+            '/webos/i' => 'Mobile',
+            '/Postman/i' => 'Postman'
         );
 
         foreach ($os_array as $regex => $value) {
@@ -298,7 +304,8 @@ EOD;
             '/netscape/i' => 'Netscape',
             '/maxthon/i' => 'Maxthon',
             '/konqueror/i' => 'Konqueror',
-            '/mobile/i' => 'Handheld Browser'
+            '/mobile/i' => 'Handheld Browser',
+            '/Postman/i' => 'Postman'
         );
 
         foreach ($browser_array as $regex => $value) {

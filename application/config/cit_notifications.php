@@ -12,6 +12,18 @@ $config["check_subscription_status_v1"] = array(
 		    "cron_format" => "0 0 * * *",
 		    "status" => "Active"
 		);
+
+
+
+$config["manage_likes_count"] = array(
+    "title" => "Manage Likes Count",
+    "folder" => "master",
+    "type" => "Time",
+    "start_date" => "",
+    "end_date" => "",
+    "cron_format" => "0 0 * * *",
+    "status" => "Active"
+);
 #####GENERATED_CONFIG_SETTINGS_END#####
 
 /* End of file cit_notifications.php */

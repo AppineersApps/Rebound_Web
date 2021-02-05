@@ -547,6 +547,18 @@ $config["rebound_user"] = array(
     "target" => ""
 );
 
+$config["rebound_now"] = array(
+    "title" => "Rebound Now Webservices",
+    "folder" => "basic_appineers_master",
+    "method" => $_SERVER['REQUEST_METHOD'],
+    "params" => array(
+    ),
+    "token" => "",
+    "payload" => array(
+    ),
+    "target" => ""
+);
+
 $config["influencer_list"] = array(
     "title" => "Rebound Influencers",
     "folder" => "influencer",
@@ -646,6 +658,33 @@ $config["subscription_purchase"] = array(
     "target" => ""
 );
 
+$config["influencer_details"] = array(
+    "title" => "Influencer details",
+    "folder" => "influencer",
+    "method" => $_SERVER['REQUEST_METHOD'],
+    "params" => array(
+        //user_access_token
+        "user_id",
+    ),
+    "token" => "",
+    "payload" => array(
+    ),
+    "target" => ""
+);
+
+$config["get_user_details"] = array(
+    "title" => "Get User Details",
+    "folder" => "basic_appineers_master",
+    "method" => "GET_POST",
+    "params" => array(
+        "user_id",
+        "other_user_id",
+    ),
+    "token" => "",
+    "payload" => array(
+    ),
+    "target" => ""
+);
 #####GENERATED_CONFIG_SETTINGS_END#####
 
 /* End of file cit_webservices.php */

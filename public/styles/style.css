@@ -79,3 +79,39 @@ div#new_pass_error { color: #c50f0f; position: absolute; top: 46px; left: 30px;f
 p.lead.ex-pass { font-size: 20px; color: #f4704e; font-family: 'hindbold'; }
 .ex-pswr img { margin-bottom:0;}
 .btn.active.focus, .btn.active:focus, .btn.focus, .btn:active.focus, .btn:active:focus, .btn:focus { outline:none;}
+
+
+#et-info a
+{
+    color: #fff;
+}
+.nav>li {
+    position: relative;
+    display: inline-flex;
+}
+.white-top {
+    background: #989898;
+    font-size: 13px;
+      min-height: 60px;
+}
+#et-info a {
+    color: #fff;
+}
+.nav>li>a {
+    color: #fff;
+}
+.white-bottom 
+{
+	background: #989898;
+}
+.copyright {
+	
+    font-size: 13px;
+    padding: 24px;
+    color: #fff;
+}
+.panel-primary>.panel-heading {
+    color: #fff;
+    background-color: #0000008c;
+    border-color: #337ab7;
+}

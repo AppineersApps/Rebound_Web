@@ -153,6 +153,10 @@ class Influencer_type_list_model extends CI_Model
             {
               $this->db->where("iInfluencerId = '".$arrResult['influencer_id']."'"); 
             }
+            if(false == empty($arrResult['influencer_code']))
+            {
+              $this->db->where("vInfluencerCode = '".$arrResult['influencer_code']."'"); 
+            }
 
             $result_obj = $this->db->get();
             

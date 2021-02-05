@@ -198,13 +198,17 @@ class Rebound_user extends Cit_Controller
             $arrParams['gender'] = isset($input_params["gender"]) ? $input_params["gender"] : "";
             $arrParams['min_age'] = isset($input_params["min_age"]) ? $input_params["min_age"] : "";
             $arrParams['max_age'] = isset($input_params["max_age"]) ? $input_params["max_age"] : "";
-            $arrParams['other_user_id'] = isset($input_params["other_user_id"]) ? $input_params["other_user_id"] : "";
+            $arrParams['other_user_id'] = isset($input_params["other_user_id"]) ? $input_params["other_user_id"] : ""; 
+
+            $arrParams['page_no'] = isset($input_params["page_no"]) ? $input_params["page_no"] : "";
 
            /* $arrParams['search_radius'] = isset($input_params["search_radius"]) ? $input_params["search_radius"] : "";*/
             
              $arrParams['distance'] = isset($input_params["distance"]) ? $input_params["distance"] : "";
       
             $this->block_result = $this->rebound_user_model->get_users_list_details($arrParams);
+
+            //print_r($this->block_result); exit();
 
             if (!$this->block_result["success"])
             {
@@ -253,7 +257,7 @@ class Rebound_user extends Cit_Controller
                             $result_arr[$data_key]["connection_type_by_receiver_user"] =  $strConnectionType ;
                         }
 
-                        $data = $data_arr["u_image1"];
+                        /*$data = $data_arr["u_image1"];
                         $image_arr = array();
                         $image_arr["image_name"] = $data;
                         $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
@@ -293,7 +297,7 @@ class Rebound_user extends Cit_Controller
                         $image_arr["path"] = "rebound/personal_images";
                         $data = $this->general->get_image_aws($image_arr);
                         $result_arr[$data_key]["u_image4"] = $data;
-
+*/
                         $data = $data_arr["user_image"];
                         $image_arr = array();
                         $image_arr["image_name"] = $data;
@@ -401,27 +405,25 @@ class Rebound_user extends Cit_Controller
             'u_first_name',
             'u_last_name',
             'user_image',
-            'u_email',
-            'u_mobile_no',
+            //'u_email',
+            //'u_mobile_no',
             'u_dob',
-            'u_gender',
-            'u_sexual_perference',
-            'u_about',
-            'u_image1',
-            'u_image2',
-            'u_image3',
-            'u_image4',
-            'u_image5',
+            //'u_gender',
+            //'u_sexual_perference',
+            //'u_about',
             'city',
             'state',
+            'u_zip_code',
             'connection_type_by_logged_user',
             'connection_type_by_receiver_user',
-            'u_Height',
-            'u_Weight',
-            'u_BodyType',
-            'u_Sign',
-            'u_Education',
-            'u_Profession',
+            //'u_Height',
+            //'u_Weight',
+            //'u_BodyType',
+            //'u_Sign',
+            //'u_Education',
+            //'u_Profession',
+            'u_InfluencerCode',
+            'u_IsSubscribed',
         );
         $output_keys = array(
             'get_users_list_details',

@@ -1162,6 +1162,7 @@ $lang["USERS_MANAGEMENT_TERMS_CONDITIONS_VERSION"] = "Terms Conditions Version" 
 $lang["USERS_MANAGEMENT_PRIVACY_POLICY_VERSION"] = "Privacy Policy Version" ;
 $lang["API_ACCESS_LOGS_API_ACCESS_LOGS"] = "API access logs" ;
 $lang["API_ACCESS_LOGS_API_NAME"] = "API Name" ;
+$lang["API_ACCESS_LOGS_API_METHOD"] = "Method" ;
 $lang["API_ACCESS_LOGS_ACCESS_DATE"] = "Access Date" ;
 $lang["API_ACCESS_LOGS_PLATFORM"] = "Platform" ;
 $lang["API_ACCESS_LOGS_BROWSER"] = "Browser" ;

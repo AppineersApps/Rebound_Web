@@ -57,7 +57,6 @@ class Wsresponse
         $this->makeUniqueParams($multiple_keys);
         $this->makeUniqueParams($custom_keys);
 
-
         $output_keys = is_array($output_keys) ? $output_keys : array();
         $output_alias = is_array($output_alias) ? $output_alias : array();
         $inner_keys = is_array($inner_keys) ? $inner_keys : array();
@@ -69,12 +68,9 @@ class Wsresponse
         $settings_fields = $this->makeFieldsArray($ouput_fields, $output_alias);
         $this->makeUniqueParams($settings_fields);
 
-
         $output_array['data'] = $output_data;
         $output_array['settings']['fields'] = $settings_fields;
-
         $output_array['settings']['message'] = $this->getWSLanguageMessage($output_array['settings']["message"], $func_array['function']['name'], "Flow", $data_array);
-
 
         return $output_array;
     }
@@ -530,13 +526,6 @@ class Wsresponse
 
     public function getWSLanguageMessage($msg_code = "", $ws_func = '', $type = '', $params = array())
     {
-
-       /* echo "in ws response--";
-        print_r($msg_code);
-        print_r($ws_func);
-        print_r($params);
-        exit();*/
-        
         $lang_code = $this->CI->general->getLangRequestValue();
         $lang_folder = strtolower($lang_code);
         if (is_file(APPPATH . "language" . DS . $lang_folder . DS . "webservice_lang.php")) {
@@ -703,12 +692,12 @@ class Wsresponse
 
                 $json_data = file_get_contents($log_file_path);
                 $input_params = json_decode($json_data, true);
+                
+                $fileContents['input_params'] = $input_params['input_params'];
                 if(empty($arr['queries']))
                 {
                     $arr['queries'] = $this->CI->general->getDBQueriesList();    
                 }
-                
-                $fileContents['input_params'] = $input_params['input_params'];
                 $fileContents['output_response'] = $arr;
 
                 $fp = fopen($log_file_path, 'w');
@@ -720,7 +709,14 @@ class Wsresponse
                 if($this->CI->session->userdata('iUserId')){
                     $updateArr['iPerformedBy'] = $this->CI->session->userdata('iUserId');
                 }else{
-                    $updateArr['iPerformedBy'] = NULL;
+                    $this->CI->db->select('iUserId,eStatus');
+                    $this->CI->db->from('users');
+                    $this->CI->db->where('vEmail',$this->CI->input->get_post("email", true));
+                    //$this->db->where('eStatus','Active');
+                    $result = $this->CI->db->get()->result_array();
+                    $userid = $result[0]['iUserId'];
+
+                    $updateArr['iPerformedBy'] = (false == empty($userid)) ? $userid : NULL;
                 }
                 $updateArr['dtExecutedDate'] = date('Y-m-d H:i:s');
                 $this->CI->db->where('iAccessLogId', $exec_data['api_log_id']);

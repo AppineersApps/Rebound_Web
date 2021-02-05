@@ -1,0 +1,64 @@
+.header-transparrent 
+{
+    position: relative;
+}
+
+
+.et_pb_text_6 {
+    font-weight: 300;
+    font-size: 30px;
+    line-height: 1.3em;
+    padding-top: 61px!important;
+}
+
+.app-img {
+    width: 100%;;
+}
+.best-features-area .single-features .features-icon span
+{
+    background-image: -webkit-linear-gradient(90deg, #FD3539  0%, #9F2828 100%);
+
+}
+.sticky-bar
+{
+    background: #9F2828;
+}
+.btn {
+    background: #9F2828;
+    }
+.slider-area .hero__caption .slider-btns a.video-btn {
+    background: #9F2828;
+}
+
+.available-app-area {
+    background-image: -webkit-linear-gradient(90deg, #FD3539  0%, #9F2828 100%);
+
+    }
+.header-sticky.sticky-bar.sticky .main-menu ul>li>a {
+    color: #fff;
+}
+.btn-group-vertical>.btn-group:after, .btn-group-vertical>.btn-group:before, .btn-toolbar:after, .btn-toolbar:before, .clearfix:after, .clearfix:before, .container-fluid:after, .container-fluid:before, .container:after, .container:before, .dl-horizontal dd:after, .dl-horizontal dd:before, .form-horizontal .form-group:after, .form-horizontal .form-group:before, .modal-footer:after, .modal-footer:before, .modal-header:after, .modal-header:before, .nav:after, .nav:before, .navbar-collapse:after, .navbar-collapse:before, .navbar-header:after, .navbar-header:before, .navbar:after, .navbar:before, .pager:after, .pager:before, .panel-body:after, .panel-body:before, .row:after, .row:before
+{
+    content: unset;
+}
+.nav>li>a:focus, .nav>li>a:hover {
+    background-color: unset;
+}
+.btn:hover::before {
+    background: #9F2828;
+}
+.btn::before {
+    background: #9F2828;
+    }
+    #scrollUp {
+    background: #9F2828;
+}
+
+.main-header .main-menu ul li>a::before
+{
+   
+    background: #FD3539;
+}
+.logo {
+    width: 100%;
+}

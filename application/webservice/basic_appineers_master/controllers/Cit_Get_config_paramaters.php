@@ -53,13 +53,17 @@ public function returnConfigParams(&$input_params=array()){
     if(!empty($userid)){
         $return_arr['terms_conditions_updated']=1;
         $return_arr['privacy_policy_updated']  =1;
-        $this->db->select('vTermsConditionsVersion,vPrivacyPolicyVersion,eLogStatus');
+        $this->db->select('vTermsConditionsVersion,vPrivacyPolicyVersion,eLogStatus,vInfluencerCode,eGender,eIsSubscribed,vSubscriptionId');
         $this->db->from('users');
         $this->db->where('iUserId',$userid);
         $version_data=$this->db->get()->row_array();
         $terms_conditions_version=$version_data['vTermsConditionsVersion'];
         $privacy_policy_version  =$version_data['vPrivacyPolicyVersion'];
         $return_arr['log_status_updated']=$version_data['eLogStatus']; 
+        $return_arr['InfluencerCode']=$version_data['vInfluencerCode']; 
+        $return_arr['Gender']=$version_data['eGender']; 
+        $return_arr['IsSubscribed']=$version_data['eIsSubscribed']; 
+        $return_arr['SubscriptionId']=$version_data['vSubscriptionId']; 
        
     }
    //terms and conditions
@@ -94,6 +98,23 @@ public function returnConfigParams(&$input_params=array()){
     }
     $return_arr['android_version_number'] =$this->config->item('ANDROID_VERSION_NUMBER');
     $return_arr['iphone_version_number']  =$this->config->item('IPHONE_VERSION_NUMBER');
+
+    $subscription_date =$this->config->item('SUBSCRIPTION_OFFER_DATE');
+    $subscription_date_original=date('Y-m-d',strtotime($subscription_date));
+     $current_date = date("Y-m-d");
+
+
+     if(strtotime($current_date) < strtotime($subscription_date_original))
+     {
+   
+      $offer_date='true';
+
+     }else
+     {
+        $offer_date='false';
+     }
+
+    $return_arr['offer_date'] =$offer_date;
 
     $return_arr['ios_app_id']  =$this->config->item('IOS_APP_ID');
     $return_arr['ios_banner_id']  =$this->config->item('IOS_BANNER_AD_ID');

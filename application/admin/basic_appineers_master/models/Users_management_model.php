@@ -816,7 +816,7 @@ class Users_management_model extends CI_Model
                 "label_lang" => $this->lang->line('USERS_MANAGEMENT_PROFILE_IMAGE'),
                 "file_upload" => "Yes",
                 "file_server" => "amazon",
-                "file_folder" => "side_jobs/user_profile",
+                "file_folder" => "rebound/user_profile",
                 "file_width" => "80",
                 "file_height" => "80",
                 "file_format" => "gif,png,jpg,jpeg,jpe,bmp,ico",

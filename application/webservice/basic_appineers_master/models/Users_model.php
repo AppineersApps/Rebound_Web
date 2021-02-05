@@ -82,6 +82,45 @@ class Users_model extends CI_Model
         return $return_arr;
     }
 
+
+      public function check_eligibility_of_logedin_user($user_id = '')
+    {
+        try {
+            $result_arr = array();
+                                
+            $this->db->from("users AS u");
+            
+            $this->db->select("u.eIsSubscribed AS u_is_subscribed");
+            $this->db->select("u.iLikesPerDay AS u_likes_per_day");
+            $this->db->select("u.iUserId AS u_users_id_1");
+            if(isset($user_id) && $user_id != ""){ 
+                $this->db->where("u.iUserId =", $user_id);
+            }
+            
+            
+            
+            $this->db->limit(1);
+            
+            $result_obj = $this->db->get();
+            $result_arr = is_object($result_obj) ? $result_obj->result_array() : array();
+            
+            if(!is_array($result_arr) || count($result_arr) == 0){
+                throw new Exception('No records found.');
+            }
+            $success = 1;
+        } catch (Exception $e) {
+            $success = 0;
+            $message = $e->getMessage();
+        }
+        
+        $this->db->_reset_all();
+        //echo $this->db->last_query();
+        $return_arr["success"] = $success;
+        $return_arr["message"] = $message;
+        $return_arr["data"] = $result_arr;
+        return $return_arr;
+    }
+
     /**
      * update_device_token method is used to execute database queries for Update Device Token API.
      * @created CIT Dev Team
@@ -116,6 +155,43 @@ class Users_model extends CI_Model
         }
         catch(Exception $e)
         {
+            $success = 0;
+            $message = $e->getMessage();
+        }
+        $this->db->flush_cache();
+        $this->db->_reset_all();
+        //echo $this->db->last_query();
+        $return_arr["success"] = $success;
+        $return_arr["message"] = $message;
+        $return_arr["data"] = $result_arr;
+        return $return_arr;
+    }
+
+
+      public function like_count_management($params_arr = array(), $where_arr = array())
+    {
+        try {
+            $result_arr = array();
+                        
+            
+            
+            if(isset($where_arr["u_users_id_1"]) && $where_arr["u_users_id_1"] != ""){ 
+                $this->db->where("iUserId =", $where_arr["u_users_id_1"]);
+            }
+           // $this->db->where("eIsSubscribed <>", "1");
+            
+            
+            $this->db->set($this->db->protect("iLikesPerDay"), $params_arr["u_likes_per_day"], FALSE);
+            $res = $this->db->update("users");
+            $affected_rows = $this->db->affected_rows();
+            if(!$res || $affected_rows == -1){
+                throw new Exception("Failure in updation.");
+            }
+            $result_param = "affected_rows2";
+            $result_arr[0][$result_param] = $affected_rows;
+            $success = 1;
+            
+        } catch (Exception $e) {
             $success = 0;
             $message = $e->getMessage();
         }
@@ -707,6 +783,32 @@ class Users_model extends CI_Model
             $this->db->select("u.eStatus AS u_status");
             $this->db->select("(concat(u.vFirstName,' ',u.vLastName)) AS email_user_name", FALSE);
             $this->db->select("u.eLogStatus AS u_log_status_updated");
+
+            $this->db->select("u.eGender AS u_gender");
+            //$this->db->select("u.vReligion AS u_religion");
+            $this->db->select("u.eSexualPrefrence AS u_sexual_perference");
+
+            $this->db->select("u.tAboutYou AS u_about");
+            $this->db->select("u.vImage1 AS u_image1");
+            $this->db->select("u.vImage2 AS u_image2");
+            $this->db->select("u.vImage3 AS u_image3");
+            $this->db->select("u.vImage4 AS u_image4");
+            $this->db->select("u.vImage5 AS u_image5");
+
+            $this->db->select("u.eStatus AS u_status");
+
+            $this->db->select("u.dHeight AS u_Height");
+            $this->db->select("u.iWeight AS u_Weight");
+            $this->db->select("u.vBodyType AS u_BodyType");
+            $this->db->select("u.vSign AS u_Sign");
+            $this->db->select("u.vEducation AS u_Education");
+            $this->db->select("u.vProfession AS u_Profession");
+            $this->db->select("u.vInfluencerCode AS u_InfluencerCode");
+            $this->db->select("u.eIsSubscribed AS u_IsSubscribed");
+
+            $this->db->select("(".$this->db->escape("").") AS connection_type_by_logged_user", FALSE);
+            $this->db->select("(".$this->db->escape("").") AS connection_type_by_receiver_user", FALSE);
+
             if (isset($insert_id) && $insert_id != "")
             {
                 $this->db->where("u.iUserId =", $insert_id);
@@ -1307,6 +1409,10 @@ class Users_model extends CI_Model
             $this->db->select("u.vEducation AS u_Education");
             $this->db->select("u.vProfession AS u_Profession");
             $this->db->select("u.tAboutYou AS u_About");
+            $this->db->select("u.vInfluencerCode AS u_InfluencerCode");
+            $this->db->select("u.eIsSubscribed AS u_IsSubscribed");
+            $this->db->select("u.vSubscriptionId AS u_SubscriptionId");
+
 
             $this->db->select("u.vImage1 AS u_Image1");
             $this->db->select("u.vImage2 AS u_Image2");
@@ -1457,6 +1563,10 @@ class Users_model extends CI_Model
             $this->db->select("u.eSexualPrefrence AS u_SexualPrefrence");
             $this->db->select("u.vEducation AS u_Education");
             $this->db->select("u.vProfession AS u_Profession");
+            $this->db->select("u.tAboutYou AS u_About");
+            $this->db->select("u.vInfluencerCode AS u_InfluencerCode");
+            $this->db->select("u.eIsSubscribed AS u_IsSubscribed");
+            $this->db->select("u.vSubscriptionId AS u_SubscriptionId");
 
             $this->db->select("u.vImage1 AS u_Image1");
             $this->db->select("u.vImage2 AS u_Image2");
@@ -1608,6 +1718,10 @@ class Users_model extends CI_Model
             $this->db->select("u.vEducation AS u_Education");
             $this->db->select("u.vProfession AS u_Profession");
             $this->db->select("u.tAboutYou AS u_About");
+            $this->db->select("u.vInfluencerCode AS u_InfluencerCode");
+            $this->db->select("u.eIsSubscribed AS u_IsSubscribed");
+            $this->db->select("u.vSubscriptionId AS u_SubscriptionId");
+
 
             $this->db->select("u.vImage1 AS u_Image1");
             $this->db->select("u.vImage2 AS u_Image2");
@@ -2061,60 +2175,60 @@ class Users_model extends CI_Model
             }
             $this->db->where_in("eStatus", array('Active'));
             $this->db->stop_cache();
-            if (isset($params_arr["first_name"]) && $params_arr["first_name"] != null)
+            if (isset($params_arr["first_name"]) )
             {
                 $this->db->set("vFirstName", $params_arr["first_name"]);
             }
-            if (isset($params_arr["last_name"]) && $params_arr["last_name"] != null)
+            if (isset($params_arr["last_name"]))
             {
                 $this->db->set("vLastName", $params_arr["last_name"]);
             }
-            if (isset($params_arr["user_profile"]) && !empty($params_arr["user_profile"]))
+            if (isset($params_arr["user_profile"]) )
             {
                 $this->db->set("vProfileImage", $params_arr["user_profile"]);
             }
 
-            if (isset($params_arr["image1"]) && !empty($params_arr["image1"]))
+            if (isset($params_arr["image1"]) )
             {
                 $this->db->set("vImage1", $params_arr["image1"]);
             }
 
-            if (isset($params_arr["image2"]) && !empty($params_arr["image2"]))
+            if (isset($params_arr["image2"]) )
             {
                 $this->db->set("vImage2", $params_arr["image2"]);
             }
 
-            if (isset($params_arr["image3"]) && !empty($params_arr["image3"]))
+            if (isset($params_arr["image3"]) )
             {
                 $this->db->set("vImage3", $params_arr["image3"]);
             }
 
-            if (isset($params_arr["image4"]) && !empty($params_arr["image4"]))
+            if (isset($params_arr["image4"]) )
             {
                 $this->db->set("vImage4", $params_arr["image4"]);
             }
 
-            if (isset($params_arr["image5"]) && !empty($params_arr["image5"]))
+            if (isset($params_arr["image5"]) )
             {
                 $this->db->set("vImage5", $params_arr["image5"]);
             }
-            if (isset($params_arr["dob"]) && $params_arr["dob"] != null)
+            if (isset($params_arr["dob"]) )
             {
                 $this->db->set("dDob", $params_arr["dob"]);
             }
-            if (isset($params_arr["address"]) && $params_arr["address"] != null)
+            if (isset($params_arr["address"]) )
             {
                 $this->db->set("tAddress", $params_arr["address"]);
             }
-            if (isset($params_arr["city"]) && $params_arr["city"] != null)
+            if (isset($params_arr["city"]) )
             {
                 $this->db->set("vCity", $params_arr["city"]);
             }
-            if (isset($params_arr["latitude"]) && $params_arr["latitude"] != null)
+            if (isset($params_arr["latitude"]) )
             {
                 $this->db->set("dLatitude", $params_arr["latitude"]);
             }
-            if (isset($params_arr["longitude"]) && $params_arr["longitude"] != null)
+            if (isset($params_arr["longitude"]) )
             {
                 $this->db->set("dLongitude", $params_arr["longitude"]);
             }
@@ -2131,55 +2245,55 @@ class Users_model extends CI_Model
                 $this->db->set("vZipCode", $params_arr["zipcode"]);
             }
 
-            if (isset($params_arr["height"]) && $params_arr["height"] != null)
+            if (isset($params_arr["height"]) )
             {
                 $this->db->set("dHeight", $params_arr["height"]);
             }
 
-            if (isset($params_arr["weight"]) && $params_arr["weight"] != null)
+            if (isset($params_arr["weight"]) )
             {
                 $this->db->set("iWeight", $params_arr["weight"]);
             } 
 
-            if (isset($params_arr["bodytype"]) && $params_arr["bodytype"] != null)
+            if (isset($params_arr["bodytype"]) )
             {
                 $this->db->set("vBodyType", $params_arr["bodytype"]);
             }
             
-            if (isset($params_arr["sign"]) && $params_arr["sign"] != null)
+            if (isset($params_arr["sign"]) )
             {
                 $this->db->set("vSign", $params_arr["sign"]);
             }
-            if (isset($params_arr["gender"]) && $params_arr["gender"] != null)
+            if (isset($params_arr["gender"]) )
             {
                 $this->db->set("eGender", $params_arr["gender"]);
             }
-             if (isset($params_arr["sexual_prefrence"]) && $params_arr["sexual_prefrence"] != null)
+             if (isset($params_arr["sexual_prefrence"]) )
             {
                 $this->db->set("eSexualPrefrence", $params_arr["sexual_prefrence"]);
             }
 
-             if (isset($params_arr["education"]) && $params_arr["education"] != null)
+             if (isset($params_arr["education"]))
             {
                 $this->db->set("vEducation", $params_arr["education"]);
             }
            
-            if (isset($params_arr["profession"])  && $params_arr["profession"] != null)
+            if (isset($params_arr["profession"]) )
             {
                 $this->db->set("vProfession", $params_arr["profession"]);
             }
 
-            if (isset($params_arr["about_you"])  && $params_arr["about_you"] != null)
+            if (isset($params_arr["about_you"]) )
             {
                 $this->db->set("tAboutYou", $params_arr["about_you"]);
             }
                        
             $this->db->set($this->db->protect("dtUpdatedAt"), $params_arr["_dtupdatedat"], FALSE);
-            if (isset($params_arr["user_name"]) && $params_arr["user_name"] != null)
+            if (isset($params_arr["user_name"]) )
             {
                 $this->db->set("vUserName", $params_arr["user_name"]);
             }
-            if (isset($params_arr["mobile_number"]) && $params_arr["mobile_number"] != null)
+            if (isset($params_arr["mobile_number"]) )
             {
                 $this->db->set("vMobileNo", $params_arr["mobile_number"]);
             }
@@ -2415,6 +2529,7 @@ class Users_model extends CI_Model
             }
 
             $this->db->set("eStatus", $params_arr["_estatus"]);
+            $this->db->set("vDeviceToken", "");
             $this->db->set($this->db->protect("dtDeletedAt"), $params_arr["_dtdeletedat"], FALSE);
             $res = $this->db->update("users");
             $affected_rows = $this->db->affected_rows();

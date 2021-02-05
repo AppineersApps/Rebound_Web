@@ -333,10 +333,8 @@ class Edit_profile extends Cit_Controller
             $path="rebound/personal_images";
                 $size="102400";
                 
-
-                if (!empty($_FILES["image1"]["name"]) && !empty($_FILES["image1"]["tmp_name"]))
+                if (isset($_FILES["image1"]["name"]) )
                 {
-
                     list($file_name, $ext) = $this->general->get_file_attributes($_FILES["image1"]["name"]);
                     $images_arr["image1"]["ext"] = implode(',', $this->config->item('IMAGE_EXTENSION_ARR'));
                     $images_arr["image1"]["size"] = $size;
@@ -344,22 +342,13 @@ class Edit_profile extends Cit_Controller
                     {
                         if ($this->general->validateFileSize($images_arr["image1"]["size"], $_FILES["image1"]["size"]))
                         {
-
-                            $folder_name =$path;  
                             $images_arr["image1"]["name"] = $file_name;           
-                             $temp_file = $_FILES["image1"]["tmp_name"];
-                            $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image1"]["name"]);
-                            if (!$res)
-                                {
-                                    
-
-                                }
+                       
                         }
                     }
                 }
 
-
-                if (!empty($_FILES["image2"]["name"]) && !empty($_FILES["image2"]["tmp_name"]))
+                if (isset($_FILES["image2"]["name"]) )
                 {
 
                     list($file_name, $ext) = $this->general->get_file_attributes($_FILES["image2"]["name"]);
@@ -370,20 +359,12 @@ class Edit_profile extends Cit_Controller
                         if ($this->general->validateFileSize($images_arr["image2"]["size"], $_FILES["image2"]["size"]))
                         {
 
-                            $folder_name =$path;  
                             $images_arr["image2"]["name"] = $file_name;           
-                             $temp_file = $_FILES["image2"]["tmp_name"];
-                            $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image2"]["name"]);
-                            if (!$res)
-                                {
-                                    
-
-                                }
                         }
                     }
                 }
 
-                if (!empty($_FILES["image3"]["name"]) && !empty($_FILES["image3"]["tmp_name"]))
+                if (isset($_FILES["image3"]["name"]) )
                 {
 
                     list($file_name, $ext) = $this->general->get_file_attributes($_FILES["image3"]["name"]);
@@ -392,22 +373,14 @@ class Edit_profile extends Cit_Controller
                     if ($this->general->validateFileFormat($images_arr["image3"]["ext"], $_FILES["image3"]["name"]))
                     {
                         if ($this->general->validateFileSize($images_arr["image3"]["size"], $_FILES["image3"]["size"]))
-                        {
-
-                            $folder_name =$path;  
+                        { 
                             $images_arr["image3"]["name"] = $file_name;           
-                             $temp_file = $_FILES["image3"]["tmp_name"];
-                            $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image3"]["name"]);
-                            if (!$res)
-                                {
-                                    
-
-                                }
+                            
                         }
                     }
                 }
 
-                  if (!empty($_FILES["image4"]["name"]) && !empty($_FILES["image4"]["tmp_name"]))
+                  if (isset($_FILES["image4"]["name"]) )
                 {
 
                     list($file_name, $ext) = $this->general->get_file_attributes($_FILES["image4"]["name"]);
@@ -418,20 +391,13 @@ class Edit_profile extends Cit_Controller
                         if ($this->general->validateFileSize($images_arr["image4"]["size"], $_FILES["image4"]["size"]))
                         {
 
-                            $folder_name =$path;  
+                            
                             $images_arr["image4"]["name"] = $file_name;           
-                             $temp_file = $_FILES["image4"]["tmp_name"];
-                            $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image4"]["name"]);
-                            if (!$res)
-                                {
-                                    
-
-                                }
                         }
                     }
                 }
 
-                 if (!empty($_FILES["image5"]["name"]) && !empty($_FILES["image5"]["tmp_name"]))
+                 if (isset($_FILES["image5"]["name"]) )
                 {
 
                     list($file_name, $ext) = $this->general->get_file_attributes($_FILES["image5"]["name"]);
@@ -441,25 +407,18 @@ class Edit_profile extends Cit_Controller
                     {
                         if ($this->general->validateFileSize($images_arr["image5"]["size"], $_FILES["image5"]["size"]))
                         {
-
-                            $folder_name =$path;  
+ 
                             $images_arr["image5"]["name"] = $file_name;           
-                             $temp_file = $_FILES["image5"]["tmp_name"];
-                            $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image5"]["name"]);
-                            if (!$res)
-                                {
-                                    
-
-                                }
+                       
                         }
                     }
                 }
 
-            if (isset($input_params["first_name"]))
+            if ((isset($input_params["first_name"]))&&(!empty($input_params["first_name"])))
             {
                 $params_arr["first_name"] = $input_params["first_name"];
             }
-            if (isset($input_params["last_name"]))
+            if ((isset($input_params["last_name"]))&&(!empty($input_params["last_name"])))
             {
                 $params_arr["last_name"] = $input_params["last_name"];
             }
@@ -468,28 +427,16 @@ class Edit_profile extends Cit_Controller
                 $params_arr["user_profile"] = $images_arr["user_profile"]["name"];
             }
 
-             if (isset($images_arr["image1"]["name"]))
-            {
-                $params_arr["image1"] = $images_arr["image1"]["name"];
-            }
-            if (isset($images_arr["image2"]["name"]))
-            {
-                $params_arr["image2"] = $images_arr["image2"]["name"];
-            }
-            if (isset($images_arr["image3"]["name"]))
-            {
-                $params_arr["image3"] = $images_arr["image3"]["name"];
-            }
+            $params_arr["image1"] = ($images_arr["image1"]["name"] != "") ? $images_arr["image1"]["name"] : "";
 
-             if (isset($images_arr["image4"]["name"]))
-            {
-                $params_arr["image4"] = $images_arr["image4"]["name"];
-            } 
+            $params_arr["image2"] = ($images_arr["image2"]["name"] != "") ? $images_arr["image2"]["name"] : "";
 
-            if (isset($images_arr["image5"]["name"]))
-            {
-                $params_arr["image5"] = $images_arr["image5"]["name"];
-            }
+            $params_arr["image3"] = ($images_arr["image3"]["name"] != "") ? $images_arr["image3"]["name"] : "";
+
+            $params_arr["image4"] = ($images_arr["image4"]["name"] != "") ? $images_arr["image4"]["name"] : "";
+
+            $params_arr["image5"] = ($images_arr["image5"]["name"] != "") ? $images_arr["image5"]["name"] : "";
+            
 
             if (isset($input_params["dob"]))
             {
@@ -519,16 +466,18 @@ class Edit_profile extends Cit_Controller
             {
                 $params_arr["state_name"] = $input_params["state_name"];
             }
-            if (isset($input_params["zipcode"]))
+
+             if (isset($input_params["zipcode"]) &&(!empty($input_params["zipcode"])))
             {
                 $params_arr["zipcode"] = $input_params["zipcode"];
             }
+
             $params_arr["_dtupdatedat"] = "NOW()";
-            if (isset($input_params["user_name"]))
+            if (isset($input_params["user_name"]) &&(!empty($input_params["user_name"])))
             {
                 $params_arr["user_name"] = $input_params["user_name"];
             }
-            if (isset($input_params["mobile_number"]))
+            if (isset($input_params["mobile_number"]) &&(!empty($input_params["mobile_number"])))
             {
                 $params_arr["mobile_number"] = $input_params["mobile_number"];
             }
@@ -574,6 +523,7 @@ class Edit_profile extends Cit_Controller
                 $params_arr["about_you"] = $input_params["about_you"];
             }
                        
+        //    print_r($params_arr); exit();
 
             $this->block_result = $this->users_model->update_profile($params_arr, $where_arr);
             if (!$this->block_result["success"])
@@ -589,6 +539,76 @@ class Edit_profile extends Cit_Controller
                 
                 $temp_file = $_FILES["user_profile"]["tmp_name"];
                 $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["user_profile"]["name"]);
+                if (!$res)
+                {
+                    //file upload failed
+
+                }
+            }
+
+            if (!empty($images_arr["image1"]["name"]))
+            {
+
+                 $folder_name = "rebound/personal_images";             
+                
+                $temp_file = $_FILES["image1"]["tmp_name"];
+                $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image1"]["name"]);
+                if (!$res)
+                {
+                    //file upload failed
+
+                }
+            }
+
+            if (!empty($images_arr["image2"]["name"]))
+            {
+
+                 $folder_name = "rebound/personal_images";             
+                
+                $temp_file = $_FILES["image2"]["tmp_name"];
+                $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image2"]["name"]);
+                if (!$res)
+                {
+                    //file upload failed
+
+                }
+            }
+
+            if (!empty($images_arr["image3"]["name"]))
+            {
+
+                 $folder_name = "rebound/personal_images";             
+                
+                $temp_file = $_FILES["image3"]["tmp_name"];
+                $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image3"]["name"]);
+                if (!$res)
+                {
+                    //file upload failed
+
+                }
+            }
+
+            if (!empty($images_arr["image4"]["name"]))
+            {
+
+                 $folder_name = "rebound/personal_images";             
+                
+                $temp_file = $_FILES["image4"]["tmp_name"];
+                $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image4"]["name"]);
+                if (!$res)
+                {
+                    //file upload failed
+
+                }
+            }
+
+            if (!empty($images_arr["image5"]["name"]))
+            {
+
+                 $folder_name = "rebound/personal_images";             
+                
+                $temp_file = $_FILES["image5"]["tmp_name"];
+                $res = $this->general->uploadAWSData($temp_file, $folder_name, $images_arr["image5"]["name"]);
                 if (!$res)
                 {
                     //file upload failed

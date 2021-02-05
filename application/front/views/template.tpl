@@ -5,7 +5,9 @@
         <meta charset="utf-8" />
         <base href="<%$this->config->item('site_url')%>" />
         <%/strip%>
-        <title><%if $meta_info|is_array && $meta_info['title'] neq ''%><%$meta_info['title']%><%else%><%$this->systemsettings->getSettings('META_TITLE')%><%/if%></title>
+          <title>Rebound</title>
+
+        <!-- <title><%if $meta_info|is_array && $meta_info['title'] neq ''%><%$meta_info['title']%><%else%><%$this->systemsettings->getSettings('META_TITLE')%><%/if%></title> -->
         <link rel="shortcut icon" href="<%$this->general->getCompanyFavIconURL()%>" />
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
@@ -22,7 +24,7 @@
                 <%$this->systemsettings->getSettings('META_OTHER')%>
             <%/if%>
         <%/if%>
-        <%$this->css->add_css("bootstrap3/bootstrap.min.css","font-awesome/icons.css")%>
+        <%$this->css->add_css("bootstrap3/bootstrap.min.css","font-awesome/icons.css","website/style.css")%>
         <%$this->css->add_css("font-awesome/font-awesome.min.css","toastr/toastr.min.css","style.css","media.css")%>
         <%$this->css->css_src()%>
         <script type='text/javascript'>
@@ -70,11 +72,19 @@
             <%include file="top/top.tpl"%>
             <!--top-part End here-->
         </div>
+        <%if $include_script_template != 'index.tpl'%>
         <div id="midd-container" class="container">
             <!-- middle part start here-->
             <%include file=$include_script_template%>
             <!-- middle part end here-->
         </div>
+         <%else%>
+         <div>
+            <!-- middle part start here-->
+            <%include file=$include_script_template%>
+            <!-- middle part end here-->
+        </div>
+         <%/if%>
         <div id="bott-container">
             <!--bottom link start here-->
             <%include file="bottom/footer.tpl"%>

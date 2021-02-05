@@ -397,6 +397,23 @@ class User_login_email extends Cit_Controller
                     $data = $this->general->get_image_aws($image_arr);
                     $result_arr[$data_key]["u_Image5"] = $data;
 
+                     $subscription_date =$this->config->item('SUBSCRIPTION_OFFER_DATE');
+                    $subscription_date_original=date('Y-m-d',strtotime($subscription_date));
+                     $current_date = date("Y-m-d");
+
+
+                     if(strtotime($current_date) < strtotime($subscription_date_original))
+                     {
+                   
+                      $offer_date='true';
+
+                     }else
+                     {
+                        $offer_date='false';
+                     }
+
+                     $result_arr[$data_key]["offer_date"] = $offer_date;
+
 
                     $i++;
                 }
@@ -633,12 +650,16 @@ class User_login_email extends Cit_Controller
             "u_SexualPrefrence",
             "u_Education",
             "u_Profession",
+            "u_InfluencerCode",
+            "u_IsSubscribed",
+            "u_SubscriptionId",
             "u_About",
             "u_Image1",
             "u_Image2",
             "u_Image3",
             "u_Image4",
             "u_Image5",
+            "offer_date",
         );
         $output_keys = array(
             'get_user_login_details',
@@ -689,12 +710,16 @@ class User_login_email extends Cit_Controller
             "u_Education"=>"Education",
             "u_Profession"=>"Profession",
             "u_About"=>"About_you",
-            "u_Income"=>"Income",
+            "u_InfluencerCode" => "InfluencerCode",
+            "u_IsSubscribed" => "IsSubscribed",
+            "u_SubscriptionId" => "SubscriptionId",
+
             "u_Image1"=>"Image1",
             "u_Image2"=>"Image2",
             "u_Image3"=>"Image3",
             "u_Image4"=>"Image4",
             "u_Image5"=>"Image5",
+            "offer_date"=>"offer_date",
         );
 
         $output_array["settings"] = $setting_fields;

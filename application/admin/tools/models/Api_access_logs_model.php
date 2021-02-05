@@ -71,7 +71,7 @@ class Api_access_logs_model extends CI_Model
         $this->primary_key = "iAccessLogId";
         $this->primary_alias = "aa_access_log_id";
         $this->physical_data_remove = "Yes";
-        $this->grid_fields = array("u_email", "aa_api_url", "aa_request_uri", "aa_platform", "aa_browser", "aa_i_paddress", "aa_access_date", "sys_custom_field_1", "sys_custom_field_2", "aa_performed_by");
+        $this->grid_fields = array("u_email", "aa_api_url", "aa_request_uri","aa_request_method", "aa_i_paddress", "aa_access_date", "sys_custom_field_1", "sys_custom_field_2", "aa_performed_by");
         $this->join_tables = array(
             array(
                 "table_name" => "users",
@@ -285,6 +285,7 @@ class Api_access_logs_model extends CI_Model
                 $this->db->select($this->table_alias . "." . $this->primary_key . " AS " . $this->primary_alias);
             }
             $this->db->select("u.vEmail AS u_email");
+        $this->db->select("aa.vRequest_method AS aa_request_method");
         $this->db->select("aa.vAPIURL AS aa_api_url");
         $this->db->select("aa.vAPIName AS aa_request_uri");
         $this->db->select("aa.vPlatform AS aa_platform");
@@ -307,6 +308,7 @@ class Api_access_logs_model extends CI_Model
             $this->db->select("aa.dtExecutedDate AS aa_executed_date");
             $this->db->select("aa.iPerformedBy AS aa_performed_by");
             $this->db->select("aa.vAPIURL AS aa_api_url");
+            $this->db->select("aa.vRequest_method AS aa_request_method");
             
         }
         
@@ -433,6 +435,7 @@ class Api_access_logs_model extends CI_Model
             $this->db->select($this->table_alias . "." . $this->primary_key . " AS " . $this->primary_alias);
         }
         $this->db->select("u.vEmail AS u_email");
+        $this->db->select("aa.vRequest_method AS aa_request_method");
         $this->db->select("aa.vAPIURL AS aa_api_url");
         $this->db->select("aa.vAPIName AS aa_request_uri");
         $this->db->select("aa.vPlatform AS aa_platform");
@@ -537,6 +540,7 @@ class Api_access_logs_model extends CI_Model
             $this->db->select($this->table_alias . "." . $this->primary_key . " AS " . $this->primary_alias);
         }
         $this->db->select("u.vEmail AS u_email");
+        $this->db->select("aa.vRequest_method AS aa_request_method");
         $this->db->select("aa.vAPIURL AS aa_api_url");
         $this->db->select("aa.vAPIName AS aa_request_uri");
         $this->db->select("aa.vPlatform AS aa_platform");
@@ -670,22 +674,22 @@ class Api_access_logs_model extends CI_Model
                 "editable" => "No",
                 "viewedit" => "No"
             ),
-                "aa_platform" => array(
-                "name" => "aa_platform",
+                "aa_request_method" => array(
+                "name" => "aa_request_method",
                 "table_name" => "api_accesslogs",
                 "table_alias" => "aa",
-                "field_name" => "vPlatform",
-                "source_field" => "aa_platform",
-                "display_query" => "aa.vPlatform",
+                "field_name" => "vRequest_method",
+                "source_field" => "aa_request_method",
+                "display_query" => "aa.vRequest_method",
                 "entry_type" => "Table",
                 "data_type" => "varchar",
                 "show_in" => "Both",
                 "type" => "textbox",
                 "align" => "left",
-                "label" => "Platform",
-                "lang_code" => "API_ACCESS_LOGS_PLATFORM",
-                "label_lang" => $this->lang->line('API_ACCESS_LOGS_PLATFORM'),
-                "width" => 50,
+                "label" => "API Method",
+                "lang_code" => "API_ACCESS_LOGS_API_METHOD",
+                "label_lang" => $this->lang->line('API_ACCESS_LOGS_API_METHOD'),
+                "width" => 100,
                 "search" => "Yes",
                 "export" => "Yes",
                 "sortable" => "Yes",
@@ -693,29 +697,7 @@ class Api_access_logs_model extends CI_Model
                 "editable" => "No",
                 "viewedit" => "No"
             ),
-                "aa_browser" => array(
-                "name" => "aa_browser",
-                "table_name" => "api_accesslogs",
-                "table_alias" => "aa",
-                "field_name" => "vBrowser",
-                "source_field" => "aa_browser",
-                "display_query" => "aa.vBrowser",
-                "entry_type" => "Table",
-                "data_type" => "varchar",
-                "show_in" => "Both",
-                "type" => "textbox",
-                "align" => "left",
-                "label" => "Browser",
-                "lang_code" => "API_ACCESS_LOGS_BROWSER",
-                "label_lang" => $this->lang->line('API_ACCESS_LOGS_BROWSER'),
-                "width" => 50,
-                "search" => "Yes",
-                "export" => "Yes",
-                "sortable" => "Yes",
-                "addable" => "No",
-                "editable" => "No",
-                "viewedit" => "No"
-            ),
+               
                 "aa_i_paddress" => array(
                 "name" => "aa_i_paddress",
                 "table_name" => "api_accesslogs",
@@ -860,6 +842,19 @@ class Api_access_logs_model extends CI_Model
     public function getFormConfiguration($name = "")
     {
         $form_config = array(
+              "aa_request_method" => array(
+                "name" => "aa_request_method",
+                "table_name" => "api_accesslogs",
+                "table_alias" => "aa",
+                "field_name" => "vRequest_method",
+                "entry_type" => "Table",
+                "data_type" => "varchar",
+                "show_input" => "Both",
+                "type" => "textbox",
+                "label" => "API Method",
+                "lang_code" => "API_ACCESS_LOGS_API_METHOD",
+                "label_lang" => $this->lang->line('API_ACCESS_LOGS_API_METHOD')
+            ),
                 "aa_request_uri" => array(
                 "name" => "aa_request_uri",
                 "table_name" => "api_accesslogs",
@@ -887,32 +882,7 @@ class Api_access_logs_model extends CI_Model
                 "label_lang" => $this->lang->line('API_ACCESS_LOGS_ACCESS_DATE'),
                 "format" => 'Y-m-d'
             ),
-                "aa_platform" => array(
-                "name" => "aa_platform",
-                "table_name" => "api_accesslogs",
-                "table_alias" => "aa",
-                "field_name" => "vPlatform",
-                "entry_type" => "Table",
-                "data_type" => "varchar",
-                "show_input" => "Both",
-                "type" => "textbox",
-                "label" => "Platform",
-                "lang_code" => "API_ACCESS_LOGS_PLATFORM",
-                "label_lang" => $this->lang->line('API_ACCESS_LOGS_PLATFORM')
-            ),
-                "aa_browser" => array(
-                "name" => "aa_browser",
-                "table_name" => "api_accesslogs",
-                "table_alias" => "aa",
-                "field_name" => "vBrowser",
-                "entry_type" => "Table",
-                "data_type" => "varchar",
-                "show_input" => "Both",
-                "type" => "textbox",
-                "label" => "Browser",
-                "lang_code" => "API_ACCESS_LOGS_BROWSER",
-                "label_lang" => $this->lang->line('API_ACCESS_LOGS_BROWSER')
-            ),
+               
                 "aa_i_paddress" => array(
                 "name" => "aa_i_paddress",
                 "table_name" => "api_accesslogs",

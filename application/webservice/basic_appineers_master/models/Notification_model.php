@@ -43,8 +43,7 @@ class Notification_model extends CI_Model
         {
 
             $user_id = isset($input_params["user_id"]) ? $input_params["user_id"] : "";
-            $app_section = isset($input_params["app_section"]) ? $input_params["app_section"] : "";
-           
+            
              $page_no = 1;
               $start_offset = 0;
               $end_offset =  $this->config->item("PAGINATION_ROW_COUNT");
@@ -63,7 +62,7 @@ class Notification_model extends CI_Model
             $this->db->join("users AS u", "n.iSenderId = u.iUserId", "left");
             $this->db->select("n.iNotificationId AS notification_id");
              $this->db->select("n.dtAddedAt AS notification_date");
-             $this->db->select("n.app_section");
+             //$this->db->select("n.app_section");
             //$this->db->select("n.iFriendReqId  AS request_id");
             $this->db->select("n.eNotificationType  AS notification_type");
             $this->db->select("n.vNotificationMessage AS message");
@@ -76,10 +75,6 @@ class Notification_model extends CI_Model
                 $this->db->where("n.iReceiverId =", $user_id);
             }
 
-            if (isset($app_section) && $app_section != "")
-            {
-                $this->db->where("n.app_section =", $app_section);
-            }
 
             $this->db->stop_cache();
 
@@ -156,7 +151,7 @@ public function delete_notification_by_user($where_arr = array())
 
             }
             $res = $this->db->delete("notification");
-            //echo $this->db->last_query();exit;
+            //echo $this->db->last_query();
             $affected_rows = $this->db->affected_rows();
             if (!$res || $affected_rows == -1)
             {

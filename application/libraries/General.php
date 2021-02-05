@@ -812,7 +812,7 @@ Class General
         $file = str_replace(" ", "_", $file);
         $file = preg_replace('/[^A-Za-z0-9@.-_]/', '', $file);
         $extension = $file_arr[count($file_arr) - 1];
-        $file_name = $file . "-" . uniqid() . "." . $extension;
+        $file_name = $file."_".uniqid().".". $extension;
         return array($file_name, $extension);
     }
 
@@ -1128,9 +1128,30 @@ Class General
                         'SourceFile' => $temp_file,
                         'ContentType'=>$content_type
                     );
+                    //prepare the API log data => start
+                    $log_data = array();
+                    $log_data['accessed_time'] = microtime();
+                    $log_data['request_func']  = "S3 Fileupload";
+                    $log_data['request_url']   = "S3 Fileupload";
+                    $object_config_log = $object_config;
+                    $object_config_log['user_id'] = $this->session->userdata['iUserId'];
+                    $log_data['input_params']  = $object_config_log;
                     $response = $s3->putObject($object_config);
+                    //prepare the API log data => continue
+                    
+                    $log_data['executed_time']   = microtime();
+                    $log_data['output_response'] = (array)$response;
+                   
+                    $this->insertApiLogger($log_data);
+                    //prepare the API log data => end
                 } catch (\Aws\S3\Exception\S3Exception $e) {
-                    log_message('error', $e->getMessage());               
+                    log_message('error', $e->getMessage());
+                    //prepare the API log data => continue
+                    $log_data['executed_time']   = microtime();
+                    $log_data['output_response'] = $e->getMessage();
+                    
+                    $this->insertApiLogger($log_data);
+                    //prepare the API log data => end               
                     
                 } catch (Exception $e) {
                     log_message('error', $e->getMessage());                   
@@ -1440,16 +1461,17 @@ Class General
         return $txt;
     }
 
-    public function pushTestNotification($device_id = '', $notify_arr = array(), $device_type = '')
+    public function pushTestNotification($device_id = '', $sound = '',$notify_arr = array(), $device_type = '')
     {
         if (empty($device_id)) {
             return FALSE;
         }
-        if ($device_type == "android" || strlen($device_id) > 70) {
+       /* if ($device_type == "android" || strlen($device_id) > 70) {
             $success = $this->androidNotification($device_id, $notify_arr['message'], $notify_arr);
         } else {
             $success = $this->iOSNotification($device_id, $notify_arr);
-        }
+        }*/
+        $success = $this->fcmNotification($device_id, $sound, $notify_arr['message'], $notify_arr);
         return $success;
     }
 
@@ -1648,7 +1670,7 @@ Class General
         return $success;
     }
 
-    public function androidNotification($device_id = '', $message = '', $extra = array())
+    public function fcmNotification($device_id = '', $sound='', $message = '', $extra = array())
     {
         $result = '';
         try {
@@ -1676,20 +1698,21 @@ Class General
                 $message_arr = array("message" => $message);
                 $data = array_merge($message_arr, $extra);
 
-                $fields = array(
+                /*$fields = array(
                     'registration_ids' => $registrationIDs,
                     'data' => $data
+                );*/
+              $fields = array(
+                    'registration_ids' => $registrationIDs,
+                    'notification' => array(
+                        "body" => $message,
+                        "sound" => $extra['sound']
+                    ),
+                    'priority' => 10
                 );
-//                $fields = array(
-//                    'registration_ids' => $registrationIDs,
-//                    'notification' => array(
-//                        "body" => $message
-//                    ),
-//                    'priority' => 10
-//                );
-//                if (!empty($extra)) {
-//                    $fields['data'] = $extra;
-//                }
+               if (!empty($extra)) {
+                    $fields['data'] = $extra;
+                }
                 $headers = array(
                     'Authorization: key=' . $apiKey,
                     'Content-Type: application/json'
@@ -1768,6 +1791,8 @@ Class General
 
     public function insertPushNotification($push_arr = array())
     {
+        // print_r($push_arr); exit();
+        
         $unique_id = $this->getPushNotifyUnique();
         if (isset($push_arr['send_mode'])) {
             if ($push_arr['send_mode'] == 'runtime') {
@@ -1795,11 +1820,12 @@ Class General
             if (is_array($vars_arr) && count($vars_arr) > 0) {
                 foreach ($vars_arr as $vk => $vv) {
                     if ($vv['key'] != "" && $vv['send'] == "Yes") {
-                        $notify_arr['others'][$vv['key']] = $vv['value'];
+                        //$notify_arr['others'][$vv['key']] = $vv['value'];
+                        $notify_arr[$vv['key']] = $vv['value'];
                     }
                 }
             }
-            $success = $this->pushTestNotification($push_arr['device_id'], $notify_arr);
+            $success = $this->pushTestNotification($push_arr['device_id'], $push_arr['sound'],$notify_arr);
         }
         $this->CI->load->model('tools/push');
         $insert_arr = array();
@@ -2124,7 +2150,8 @@ Class General
         $this->CI->load->library('twilio', $auth);
         $response = $this->CI->twilio->sendMessage($to, $message);
      
-        if ($response['success']) {
+     
+        if (false == empty($response['success'])) {
             return TRUE;
         } else {
             $this->_notify_error = $response['message'] || "SMS sending failed.";
@@ -2882,6 +2909,7 @@ Class General
                 $this->CI->db->order_by("mainMenu", "DESC");
                 $this->CI->db->limit(1);
                 $db_data_obj = $this->CI->db->get("mod_admin_menu AS m");
+                #echo $this->CI->db->last_query();exit;
                 $db_data = is_object($db_data_obj) ? $db_data_obj->result_array() : array();
 
                 $main_menu = $db_data[0]['mainMenu'];
@@ -5410,6 +5438,151 @@ EOD;
         fclose($fp);
         return TRUE;
     }
+
+      public function insertApiLogger($input_params = array())
+    {
+        $this->CI = &get_instance();
+
+        $ip_addr = $this->getHTTPRealIPAddr();
+        $user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $plat_form = $this->get_platform($user_agent);
+        
+        $browser = $this->get_browser($user_agent);
+
+        $request_func = $this->CI->uri->segments[2];
+        $request_url = !empty($input_params['request_url']) ? $input_params['request_url'] : "";
+        $file_name_func = !empty($input_params['file_name_func']) ? $input_params['file_name_func'] : "";
+        $input_array = !empty($input_params['input_params']) ? $input_params['input_params'] : "";
+        $output_response = !empty($input_params['output_response']) ? $input_params['output_response'] : "";
+        $accessed_time = !empty($input_params['accessed_time']) ? $input_params['accessed_time'] : "";
+        $executed_time = !empty($input_params['executed_time']) ? $input_params['executed_time'] : "";
+
+        // Input Params and Output Response file creation => start
+        list($start_micro, $start_date) = explode(" ", $accessed_time);
+        list($executed_micro, $execute_date) = explode(" ", $executed_time);
+
+        $access_date = date("Y-m-d H:i:s", $start_date);
+        $executed_date = date("Y-m-d H:i:s", $execute_date);
+
+        $access_log_folder = $this->CI->config->item('admin_access_log_path');
+        if (!is_dir($access_log_folder))
+        {
+            $this->createFolder($access_log_folder);
+        }
+
+        $log_folder_path = $access_log_folder."api_logs".DS;
+        if (!is_dir($log_folder_path))
+        {
+            $this->createFolder($log_folder_path);
+        }
+        $log_file_ext = 'json';
+
+        $file_name = $file_name_func."-".$start_date."-".mt_rand(1, 1000).".".$log_file_ext;
+
+        $log_file_path = $log_folder_path.$file_name;
+
+        $fileContents['input_params'] = $input_array;
+        $fileContents['output_response'] = $output_response;
+
+        $fp = fopen($log_file_path, 'a+');
+        fwrite($fp, json_encode($fileContents));
+        fclose($fp);
+
+        // Input Params and Output Response file creation => end
+        if (file_exists($log_file_path))
+        {
+            $data_array = array();
+            $data_array['vIPAddress'] = $ip_addr;
+            $data_array['vAPIName'] = $request_func;
+            $data_array['vAPIURL'] = $request_url;
+            $data_array['dAccessDate'] = $access_date;
+            $data_array['vPlatform'] = $plat_form;
+            $data_array['vBrowser'] = $browser;
+            $data_array['vFileName'] = $file_name;
+            $data_array['iPerformedBy'] = '0';
+            $data_array['dtExecutedDate'] = $executed_date;
+            $result = $this->CI->db->insert('api_accesslogs', $data_array);
+            if (!empty($result))
+            {
+                $return_arr['success'] = true;
+            }
+            else
+            {
+                $return_arr['success'] = false;
+            }
+            return $return_arr;
+        }
+        //pr($return_arr,1);
+    // Access Logs insertion => end
+    }
+
+    public function get_platform($user_agent = '')
+    {
+        $os_platform = "Unknown OS Platform";
+
+        $os_array = array(
+            '/windows nt 6.3/i' => 'Windows 8.1',
+            '/windows nt 6.2/i' => 'Windows 8',
+            '/windows nt 6.1/i' => 'Windows 7',
+            '/windows nt 6.0/i' => 'Windows Vista',
+            '/windows nt 5.2/i' => 'Windows Server 2003/XP x64',
+            '/windows nt 5.1/i' => 'Windows XP',
+            '/windows xp/i' => 'Windows XP',
+            '/windows nt 5.0/i' => 'Windows 2000',
+            '/windows me/i' => 'Windows ME',
+            '/win98/i' => 'Windows 98',
+            '/win95/i' => 'Windows 95',
+            '/win16/i' => 'Windows 3.11',
+            '/macintosh|mac os x/i' => 'Mac OS X',
+            '/mac_powerpc/i' => 'Mac OS 9',
+            '/linux/i' => 'Linux',
+            '/ubuntu/i' => 'Ubuntu',
+            '/iphone/i' => 'iPhone',
+            '/ipod/i' => 'iPod',
+            '/ipad/i' => 'iPad',
+            '/android/i' => 'Android',
+            '/blackberry/i' => 'BlackBerry',
+            '/webos/i' => 'Mobile',
+        );
+
+        foreach ($os_array as $regex => $value)
+        {
+            if (preg_match($regex, $user_agent))
+            {
+                $os_platform = $value;
+            }
+        }
+        return $os_platform;
+    }                  
+
+    public function get_browser($user_agent = '')
+    {
+        $browser = "Unknown Browser";
+
+        $browser_array = array(
+            '/msie/i' => 'Internet Explorer',
+            '/firefox/i' => 'Firefox',
+            '/safari/i' => 'Safari',
+            '/chrome/i' => 'Chrome',
+            '/opera/i' => 'Opera',
+            '/netscape/i' => 'Netscape',
+            '/maxthon/i' => 'Maxthon',
+            '/konqueror/i' => 'Konqueror',
+            '/mobile/i' => 'Handheld Browser',
+        );
+
+        foreach ($browser_array as $regex => $value)
+        {
+            if (preg_match($regex, $user_agent))
+            {
+                $browser = $value;
+            }
+        }
+
+        return $browser;
+    }
+
+    
 }
 
 /* End of file General.php */

@@ -851,6 +851,24 @@ class Social_sign_up extends Cit_Controller
 
                     $result_arr[$data_key]["u_profile_image"] = $data;
 
+                     $subscription_date =$this->config->item('SUBSCRIPTION_OFFER_DATE');
+                    $subscription_date_original=date('Y-m-d',strtotime($subscription_date));
+                     $current_date = date("Y-m-d");
+
+
+                     if(strtotime($current_date) < strtotime($subscription_date_original))
+                     {
+                   
+                      $offer_date='true';
+
+                     }else
+                     {
+                        $offer_date='false';
+                     }
+
+                     $result_arr[$data_key]["offer_date"] = $offer_date;
+
+
                     $i++;
                 }
                 $this->block_result["data"] = $result_arr;
@@ -935,6 +953,7 @@ class Social_sign_up extends Cit_Controller
             "message" => "users_finish_success",
         );
         $output_fields = array(
+            'u_user_id',
             'u_first_name',
             'u_last_name',
             'u_user_name',
@@ -966,12 +985,14 @@ class Social_sign_up extends Cit_Controller
             'terms_conditions_version',
             'privacy_policy_version',
             'u_log_status_updated',
+            'offer_date',
         );
         $output_keys = array(
             'get_user_details_v1_v1',
         );
         $ouput_aliases = array(
             "get_user_details_v1_v1" => "get_user_details",
+            "u_user_id" => "user_id",
             "u_first_name" => "first_name",
             "u_last_name" => "last_name",
             "u_user_name" => "user_name",
@@ -1001,6 +1022,7 @@ class Social_sign_up extends Cit_Controller
             "t_one_time_transaction" => "purchase_receipt_data",
             "u_push_notify" => "push_notify",
             "u_log_status_updated" => "log_status_updated",
+             "offer_date" => "offer_date",
         );
 
         $output_array["settings"] = $setting_fields;
@@ -1090,6 +1112,7 @@ class Social_sign_up extends Cit_Controller
             "message" => "Registered successfully",
         );
             $output_fields = array(
+            'u_user_id',
             'u_first_name',
             'u_last_name',
             'u_user_name',
@@ -1128,6 +1151,7 @@ class Social_sign_up extends Cit_Controller
         );
         $ouput_aliases = array(
             "get_user_updated_details" => "get_user_updated_details",
+            "u_user_id" => "user_id",
             "u_first_name" => "first_name",
             "u_last_name" => "last_name",
             "u_user_name" => "user_name",

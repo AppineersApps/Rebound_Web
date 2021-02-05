@@ -121,17 +121,20 @@ class Wscontroller extends Cit_Controller
             {
                 
                 $access = $req_token;
-                $this->db->select('iUserId,eStatus');
+                $this->db->select('iUserId,eStatus,vInfluencerCode');
                 $this->db->from('users');
                 $this->db->where('vAccessToken',$access);
                 //$this->db->where('eStatus','Active');
                 $result = $this->db->get()->result_array();
                 $userid = $result[0]['iUserId']; 
                 $status = $result[0]['eStatus'];    
+                $vInfluencerCode = $result[0]['vInfluencerCode'];    
             }
             if(!empty($userid) && $status =='Active'){
                  
                 $request_arr['user_id']=$userid;
+                $request_arr['influencer_code']=$vInfluencerCode;
+
             }else if(!empty($userid) && $status =='Inactive'){
 
                 $appFailled = "Yes";
@@ -150,12 +153,15 @@ class Wscontroller extends Cit_Controller
             if($req_token)
             {
                     $access = $req_token;
-                    $this->db->select('iUserId');
+                    $this->db->select('iUserId,vInfluencerCode');
                     $this->db->from('users');
                     $this->db->where('vAccessToken',$req_token);
                     $result = $this->db->get()->result_array();
                     $userid = $result[0]['iUserId'];    
+                    $vInfluencerCode = $result[0]['vInfluencerCode']; 
+ 
                     $request_arr['user_id']=$userid;
+                    $request_arr['influencer_code']=$vInfluencerCode;
             }
             
         }
@@ -166,7 +172,7 @@ class Wscontroller extends Cit_Controller
         {
             $output_arr['settings']['success'] = $code;
             $output_arr['settings']['message'] = $msg;
-            $output_arr['data'] = "";
+            $output_arr['data'] = array();
             $this->wsresponse->sendWSResponse($output_arr, array(), $res_format);
         }
 

@@ -51,6 +51,7 @@ class Subscription_purchase extends Cit_Controller
 
         $this->load->library('wsresponse');
         $this->load->model('subscription_purchase_model');
+        #$this->config->item("PAGINATION_ROW_COUNT");
         // $this->load->model("users/users_model");
     }
 
@@ -127,7 +128,9 @@ class Subscription_purchase extends Cit_Controller
 
                         $input_params = $this->subscription_purchase($input_params);
 
-                       
+                         $input_params = $this->get_user_influencer_deatils($input_params);
+
+                         $input_params = $this->add_user_influencer_revenue($input_params);      
 
                         $output_response = $this->users_finish_success($input_params);
                         return $output_response;
@@ -187,6 +190,78 @@ class Subscription_purchase extends Cit_Controller
             $message = $e->getMessage();
         }
         return $output_response;
+    }
+
+
+     public function get_user_influencer_deatils($input_params = array())
+    {
+
+        $this->block_result = array();
+        try
+        {
+
+            $user_id = isset($input_params["user_id"]) ? $input_params["user_id"] : "";
+           
+            $this->block_result = $this->subscription_purchase_model->get_user_influencer_deatils($user_id);
+            if (!$this->block_result["success"])
+            {
+                throw new Exception("No records found.");
+            }
+            $result_arr = $this->block_result["data"];
+            
+        }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $this->block_result["data"] = array();
+        }
+        $input_params["get_user_influencer_deatils"] = $this->block_result["data"];
+        $input_params = $this->wsresponse->assignSingleRecord($input_params, $this->block_result["data"]);
+
+        return $input_params;
+    }
+
+
+     public function add_user_influencer_revenue($input_params = array())
+    {
+
+        $this->block_result = array();
+        try
+        {
+
+            $params_arr = array();
+            $params_arr["_dtaddedat"] = "NOW()";
+            
+            if (isset($input_params["user_id"]))
+            {
+                $params_arr["user_id"] = $input_params["user_id"];
+            }
+            if (isset($input_params["u_influencer_code"]))
+            {
+                $params_arr["u_influencer_code"] = $input_params["u_influencer_code"];
+            }
+            
+            if (isset($input_params["product_id"]))
+            {
+                $params_arr["product_id"] = $input_params["product_id"];
+            }
+
+             if (isset($input_params["expiry_date"]))
+            {
+                $params_arr["expiry_date"] = $input_params["expiry_date"];
+            }
+           
+            $this->block_result = $this->subscription_purchase_model->add_user_influencer_revenue($params_arr);
+        }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $this->block_result["data"] = array();
+        }
+        $input_params["add_user_influencer_revenue"] = $this->block_result["data"];
+        $input_params = $this->wsresponse->assignSingleRecord($input_params, $this->block_result["data"]);
+
+        return $input_params;
     }
 
     /**

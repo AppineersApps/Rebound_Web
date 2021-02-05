@@ -229,7 +229,7 @@ class PushNotify extends Cit_Controller
                 $notify_arr['code'] = $code;
                 $notify_arr['id'] = $unique_id;
                 $notify_arr['others'] = $pair_vars;
-                $success = $this->general->pushTestNotification($to, $notify_arr);
+                $success = $this->general->pushTestNotification($to,$notify_arr['sound'], $notify_arr);
 
                 $insert_arr['vUniqueId'] = $unique_id;
                 $insert_arr['vDeviceId'] = $to;

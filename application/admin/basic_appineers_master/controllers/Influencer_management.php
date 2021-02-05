@@ -546,7 +546,33 @@ class Influencer_management extends Cit_Controller
             {
                 $ctrl_flow = $this->ci_local->read($this->general->getMD5EncryptString("FlowEdit", "influencer_management"), $this->session->userdata('iAdminId'));
                 $data_arr = $this->influencer_management_model->getData(intval($id));
+               
+               //print_r($data_arr);
+
                 $data = $orgi = $data_arr[0];
+
+                $yr_arr[] = date("Y");
+                $lastyr_arr = date("Y",strtotime("-2 YEAR"));
+
+
+                $revenew_arr = $this->influencer_management_model->getInfluencerRevenew($data['i_influencer_code'],$lastyr_arr);
+
+                //    print_r($revenew_arr);
+ 
+                $year1 = date("Y",strtotime("-1 YEAR"));
+
+                if(array_key_exists($year1, $revenew_arr))
+                {
+                    $yr_arr[] = date("Y",strtotime("-1 YEAR"));
+                }
+
+                $year2 = date("Y",strtotime("-2 YEAR"));
+
+                if(array_key_exists($year2, $revenew_arr))
+                {
+                    $yr_arr[] = date("Y",strtotime("-2 YEAR"));
+                }
+                
                 if ((!is_array($data) || count($data) == 0) && $params_arr['rmPopup'] != "true")
                 {
                     throw new Exception($this->general->processMessageLabel('ACTION_RECORDS_WHICH_YOU_ARE_TRYING_TO_ACCESS_ARE_NOT_AVAILABLE_C46_C46_C33'));
@@ -788,6 +814,8 @@ class Influencer_management extends Cit_Controller
                 'mod_enc_mode' => $this->mod_enc_mode,
                 'extra_qstr' => $extra_qstr,
                 'extra_hstr' => $extra_hstr,
+                'revenew_arr' => $revenew_arr,
+                'year_arr' => $yr_arr,
             );
             $this->smarty->assign($render_arr);
             if (!empty($render_arr['overwrite_view']))

@@ -113,6 +113,11 @@ class Messages_model extends CI_Model
             {
                 $this->db->set("vMessage", $params_arr["message"]);
             }
+
+             if (isset($params_arr["upload_doc"]) && !empty($params_arr["upload_doc"]))
+            {
+                $this->db->set("tMessageUpload", $params_arr["upload_doc"]);
+            }
             
             $this->db->set($this->db->protect("dtModifiedDate"), $params_arr["_dtmodifieddate"], FALSE);
             $res = $this->db->update("message");
@@ -172,6 +177,12 @@ class Messages_model extends CI_Model
             {
                 $this->db->set("vMessage", $params_arr["message"]);
             }
+
+             if (isset($params_arr["upload_doc"]) && !empty($params_arr["upload_doc"]))
+            {
+                $this->db->set("tMessageUpload", $params_arr["upload_doc"]);
+            }
+
             
             $this->db->set($this->db->protect("dtAddedDate"), $params_arr["_dtaddeddate"], FALSE);
             $this->db->set($this->db->protect("dtModifiedDate"), $params_arr["_dtmodifieddate"], FALSE);
@@ -224,6 +235,7 @@ class Messages_model extends CI_Model
             $this->db->select("CONCAT(s.vFirstName,\" \",s.vLastName) AS s_name");
            // $this->db->select("r.eNotificationType AS r_notification");
             $this->db->where("(m.iSenderId = ".$user_id." AND m.iReceiverId = ".$receiver_id.")", FALSE, FALSE);
+            $this->db->where("r.eStatus","Active");
 
             $this->db->limit(1);
 
@@ -274,6 +286,7 @@ class Messages_model extends CI_Model
             $this->db->select("m.iSenderId AS sender_id");
             $this->db->select("m.iReceiverId AS receiver_id");
             $this->db->select("m.vMessage AS message");
+            $this->db->select("m.tMessageUpload AS message_upload");
             $this->db->select("concat(u.vFirstName,\" \",u.vLastName) AS sender_name");
             $this->db->select("concat(u1.vFirstName,\" \",u1.vLastName) AS receiver_name");
             $this->db->select("m.dtModifiedDate AS updated_at");

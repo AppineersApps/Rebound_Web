@@ -75,7 +75,7 @@ class Influencer_list extends Cit_Controller
     {
         
          $valid_arr = array(            
-            "influencer_code" => array(
+            "influencerCode" => array(
                 array(
                     "rule" => "required",
                     "value" => TRUE,
@@ -108,7 +108,8 @@ class Influencer_list extends Cit_Controller
      */
     public function start_influencer_list($request_arr = array(), $inner_api = FALSE)
     {
-       //print_r($request_arr);
+     // print_r($request_arr); exit();
+       
         $method = $_SERVER['REQUEST_METHOD']; ///cit file
         $output_response = array();
 
@@ -290,6 +291,8 @@ class Influencer_list extends Cit_Controller
             $condition_res = $this->is_set($input_params);
             if ($condition_res["success"])
             {
+                $input_params = $this->get_influencer_details_v1($input_params);
+
                 $output_response = $this->set_influencer_finish_success($input_params);
                 return $output_response;
             }
@@ -308,21 +311,92 @@ class Influencer_list extends Cit_Controller
 
     }
 
+    /**
+     * get_business_type_list_v1 method is used to process query block.
+     * @created priyanka chillakuru | 18.09.2019
+     * @modified priyanka chillakuru | 18.09.2019
+     * @param array $input_params input_params array to process loop flow.
+     * @return array $input_params returns modfied input_params array.
+     */
+    public function get_influencer_details_v1($input_params = array())
+    {
+       // print_r($input_param); // no states found
+
+        $this->block_result = array();
+        try
+        {
+            $params_arr = array();
+
+            if (isset($input_params["influencerCode"]) &&(!empty($input_params["influencerCode"])))
+            {
+                $params_arr["influencer_code"] = $input_params["influencerCode"];
+            }
+
+                $this->block_result = $this->influencer_type_list_model->get_influencer_details($params_arr);
+                
+                 if (!$this->block_result["success"])
+                {
+                    throw new Exception("No records found.");
+                }
+                $result_arr = $this->block_result["data"];
+
+                if (is_array($result_arr) && count($result_arr) > 0)
+                {
+                    $i = 0;
+                    foreach ($result_arr as $data_key => $data_arr)
+                    {
+
+                        $data = $data_arr["influencer_image"];
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $image_arr["path"] = "rebound/influencer_image";
+                        $p_key = ($data_arr["influencer_id"] != "") ? $data_arr["influencer_id"] : $input_params["influencer_id"];
+                        $image_arr["pk"] = $p_key;
+                       // $image_arr["path"] = $this->general->getImageNestedFolders($dest_path);
+                        $data = $this->general->get_image_aws($image_arr);
+
+                        $result_arr[$data_key]["influencer_image"] = $data;
+
+                        $i++;
+                    }
+                    $this->block_result["data"] = $result_arr;
+            }
+        }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $this->block_result["data"] = array();
+
+            if($input_params["influencerCode"] != "")
+            {
+                $this->block_result["data"] = array( "influencer_name" => $input_params["influencerCode"],"influencer_code" => $input_params["influencerCode"]);
+            }
+        }
+        $input_params["get_influencer_details_v1"] = $this->block_result["data"];
+
+        return $input_params;
+    }
 
      public function set_influencer($input_params = array())
     {
         $this->block_result = array();
         try
         {
+
+          // print_r($input_params); exit;
+
             $params_arr = array(); 
             if (isset($input_params["user_id"]))
             {
                 $params_arr["user_id"] = $input_params["user_id"];
             }           
             
-            if (isset($input_params["influencer_code"]))
+            if ((isset($input_params["influencerCode"]))&&(!empty($input_params["influencerCode"])))
             {
-                $params_arr["influencer_code"] = $input_params["influencer_code"];
+                $params_arr["influencer_code"] = $input_params["influencerCode"];
             }
              $params_arr["_upddat"] = "NOW()";
             $this->block_result = $this->influencer_type_list_model->set_influencer($params_arr);
@@ -391,15 +465,33 @@ class Influencer_list extends Cit_Controller
         //print_r($input_params);exit;
         $setting_fields = array(
             "success" => "1",
-            "message" => "Set user influencer",
+            "message" => "set_influencer_finish_success",
         );
-        $output_fields = array();
+        $output_fields = array(
+            'influencer_id',
+            'influencer_name',
+            'influencer_code',
+            'influencer_image',
+        );
+
+        $output_keys = array(
+            'get_influencer_details_v1',
+        );
+       $ouput_aliases = array(
+            "get_influencer_details_v1" => "get_influencers_list",
+            "iInfluencerId" => "influencer_id",
+            "vInfluencerName" => "influencer_name",
+            "vInfluencerCode" => "influencer_code",
+            "vInfluencerImage" => "influencer_image"
+        );
 
         $output_array["settings"] = $setting_fields;
         $output_array["settings"]["fields"] = $output_fields;
         $output_array["data"] = $input_params;
 
-        $func_array["function"]["name"] = "set_influencer";//Function name
+        $func_array["function"]["name"] = "influencer_list";
+        $func_array["function"]["output_keys"] = $output_keys;
+        $func_array["function"]["output_alias"] = $ouput_aliases;
         $func_array["function"]["multiple_keys"] = $this->multiple_keys;
 
         $this->wsresponse->setResponseStatus(200);

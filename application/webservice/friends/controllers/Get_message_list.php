@@ -246,7 +246,18 @@ class Get_message_list extends Cit_Controller
 
                      //print_r($result_arr);exit;
 
+                    //****************************
+                    $data1 = $data_arr["message_upload"];
+                    $image_arr = array();
+                    $image_arr["image_name"] = $data1;
+                     $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                    $image_arr["path"] ="rebound/chat_uploads";
+                    $data1 = $this->general->get_image_aws($image_arr);
                     
+                    $result_arr[$data_key]["message_upload"] = (false == empty($data1))?$data1:"";
+
                 }
                 //print_r($result_arr);exit;
                 $this->block_result["data"] = $result_arr;
@@ -678,6 +689,7 @@ class Get_message_list extends Cit_Controller
             'updated_at',
             'sender_image',
             'receiver_image',
+            'message_upload',
             'message_date',
             'connection_type_by_logged_user',
             'connection_type_by_receiver_user',

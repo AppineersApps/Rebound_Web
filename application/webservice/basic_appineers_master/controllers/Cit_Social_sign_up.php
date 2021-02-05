@@ -45,8 +45,8 @@ public function checkUniqueUser($input_params=array()){
         $this->db->where('vEmail',$input_params['email']);
         $email_data=$this->db->get()->result_array();
         if($email_data[0]['vEmail']==$input_params['email']){
-          /* $return_arr['message']="This email is already registered, please try using different email."; */
-           $return_arr['status'] = "2";
+           $return_arr['message']="This email is already registered, please try using different email.";
+           $return_arr['status'] = "0";
            return  $return_arr;
         }
     }

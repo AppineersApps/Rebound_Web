@@ -46,6 +46,7 @@ class Get_user_details extends Cit_Controller
         $this->block_result = array();
 
         $this->load->library('wsresponse');
+        $this->load->model('rebound_user_model');
         $this->load->model("basic_appineers_master/users_model");
     }
 
@@ -64,6 +65,13 @@ class Get_user_details extends Cit_Controller
                     "rule" => "required",
                     "value" => TRUE,
                     "message" => "user_id_required",
+                )
+            ),
+            "other_user_id" => array(
+                array(
+                    "rule" => "required",
+                    "value" => TRUE,
+                    "message" => "other_user_id_required",
                 )
             ),
 
@@ -103,7 +111,7 @@ class Get_user_details extends Cit_Controller
             $output_array = $func_array = array();
            	//print_r($input_params); exit;
 
-               $input_params = $this->get_user_login_details($input_params['user_id']);
+               $input_params = $this->get_user_login_details($input_params);
  
                 $condition_res = $this->check_user_exists($input_params);
                 if ($condition_res["success"])
@@ -174,14 +182,17 @@ class Get_user_details extends Cit_Controller
      * @param array $input_params input_params array to process loop flow.
      * @return array $input_params returns modfied input_params array.
      */
-    public function get_user_login_details($user_id)
+    public function get_user_login_details($input_params = array())
     {
 
         $this->block_result = array();
         try
         {
+            $arrParams['user_id'] = isset($input_params["user_id"]) ? $input_params["user_id"] : "";
 
-            $this->block_result = $this->users_model->get_user_personal_details($user_id);
+            $arrParams['other_user_id'] = isset($input_params["other_user_id"]) ? $input_params["other_user_id"] : ""; 
+
+            $this->block_result = $this->users_model->get_user_details($arrParams['other_user_id']);
 
             if (!$this->block_result["success"])
             {
@@ -194,48 +205,101 @@ class Get_user_details extends Cit_Controller
                 foreach ($result_arr as $data_key => $data_arr)
                 {
 
-                    //****************************
-                    $data1 = $data_arr["u_Image1"];
-                    $image_arr = array();
-                    $image_arr["image_name"] = $data1;
-                    $dest_path = "personal_images";
-         
-                    $image_arr["path"] ="widsconnect/personal_images";
-                    $data = $this->general->get_image_aws($image_arr);
-                    
-                    $result_arr[$data_key]["u_Image1"] = (false == empty($data1))?$data1:"";
+                     $strConnectionType  ='';
+                       if($data_arr["u_user_id"] == $arrParams['user_id'])
+                       {
+                          $data_arr["u_user_id"] = $arrParams['other_user_id'];
+                       }
+                  
+                        $arrConnectionType = $this->get_users_connection_details($arrParams['user_id'],$data_arr["u_user_id"],$arrParams['other_user_id']);
+                      
+                        if(false == empty($arrConnectionType['0']['connection_type'])){
 
-                    //****************************
-                    $data1 = $data_arr["u_Image2"];
-                    $image_arr = array();
-                    $image_arr["image_name"] = $data2;
-                    $dest_path = "personal_images";
-                    $image_arr["path"] ="widsconnect/personal_images";
-                    $data = $this->general->get_image_aws($image_arr);
-                    
-                    $result_arr[$data_key]["u_Image2"] = (false == empty($data2))?$data2:"";
+                              $strConnectionType =$arrConnectionType['0']['connection_type'];
+                              $result_arr[$data_key]["connection_type_by_receiver_user"] =  $strConnectionType ;
+                          }else{
+                              $result_arr[$data_key]["connection_type_by_receiver_user"] =  '' ;
+                          }
 
-                    //****************************
-                    $data1 = $data_arr["u_Image3"];
-                    $image_arr = array();
-                    $image_arr["image_name"] = $data3;
-                    $dest_path = "personal_images";
-                    $image_arr["path"] ="widsconnect/personal_images";
-                    $data = $this->general->get_image_aws($image_arr);
-                    
-                    $result_arr[$data_key]["u_Image3"] = (false == empty($data3))?$data3:"";
 
-                    //****************************
-                    $data1 = $data_arr["u_Image4"];
-                    $image_arr = array();
-                    $image_arr["image_name"] = $data4;
-                    $dest_path = "personal_images";
+                         if(false == empty($arrConnectionType['0']['connection_type_by_logged_user'])){
 
-                    $image_arr["path"] ="widsconnect/personal_images";
-                    $data = $this->general->get_image_aws($image_arr);
-                    
-                    $result_arr[$data_key]["u_Image4"] = (false == empty($data4))?$data4:"";
+                            $strConnectionType =$arrConnectionType['0']['connection_type_by_logged_user'];
+                            $result_arr[$data_key]["connection_type_by_logged_user"] =  $strConnectionType ;
+                        }else{
 
+                            $result_arr[$data_key]["connection_type_by_logged_user"] =  '';
+                        }
+
+                         if(false == empty($arrConnectionType['0']['connection_type_by_receiver_user'])){
+
+                            $strConnectionType =$arrConnectionType['0']['connection_type_by_receiver_user'];
+                            $result_arr[$data_key]["connection_type_by_receiver_user"] =  $strConnectionType ;
+                        }
+
+                    $data = $data_arr["u_image1"];
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $image_arr["path"] = "rebound/personal_images";
+                        $data = $this->general->get_image_aws($image_arr);
+                        $result_arr[$data_key]["u_image1"] = $data;
+
+                         $data = $data_arr["u_image2"];
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $image_arr["path"] = "rebound/personal_images";
+                        $data = $this->general->get_image_aws($image_arr);
+                        $result_arr[$data_key]["u_image2"] = $data;
+
+
+                         $data = $data_arr["u_image3"];
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $image_arr["path"] = "rebound/personal_images";
+                        $data = $this->general->get_image_aws($image_arr);
+                        $result_arr[$data_key]["u_image3"] = $data;
+
+                        $data = $data_arr["u_image4"];
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $image_arr["path"] = "rebound/personal_images";
+                        $data = $this->general->get_image_aws($image_arr);
+                        $result_arr[$data_key]["u_image4"] = $data;
+
+                        $data = $data_arr["u_image5"];
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $image_arr["path"] = "rebound/personal_images";
+                        $data = $this->general->get_image_aws($image_arr);
+                        $result_arr[$data_key]["u_image5"] = $data;
+
+                        $data = $data_arr["u_profile_image"];
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $dest_path = "rebound/user_profile";
+                        $image_arr["path"] = $this->general->getImageNestedFolders($dest_path);
+                         $data = $this->general->get_image_aws($image_arr);
+
+                        $result_arr[$data_key]["u_profile_image"] = $data;
+                   
                     $i++;
                 }
                 $this->block_result["data"] = $result_arr;
@@ -250,6 +314,36 @@ class Get_user_details extends Cit_Controller
         $input_params = $this->wsresponse->assignSingleRecord($input_params, $this->block_result["data"]);
 
         return $input_params;
+    }
+
+     /**
+     * get_users_list method is used to process query block.
+     * @created kavita sawant | 27-05-2020
+     * @modified kavita sawant  | 01.10.2019
+     * @param array $input_params input_params array to process loop flow.
+     * @return array $input_params returns modfied input_params array.
+     */
+    public function get_users_connection_details($user_id = '',$connection_id='')
+    {
+
+        $this->block_result = array();
+        try
+        {
+            
+            $this->block_result = $this->rebound_user_model->get_users_connection_details($user_id,$connection_id);
+            
+            if (!$this->block_result["success"])
+            {
+                throw new Exception("No records found.");
+            }
+            $result_arr = $this->block_result["data"];
+            }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $this->block_result["data"] = array();
+        }
+        return $result_arr;
     }
 
     /**
@@ -304,64 +398,43 @@ class Get_user_details extends Cit_Controller
         );
         $output_fields = array(
             'u_user_id',
-            'u_Smoke',
-            'u_UploadDoc',
-            'u_Drink',
-            'u_420Friendly',
+            'email_user_name',
+            'u_first_name',
+            'u_last_name',
+            'u_profile_image',
+            'u_email',
+            'u_mobile_no',
+            'u_dob',
+            'u_gender',
+            'u_sexual_perference',
+            'u_about',
+            'u_image1',
+            'u_image2',
+            'u_image3',
+            'u_image4',
+            'u_image5',
+            'city',
+            'state',
             'u_Height',
-            'u_Kids',
+            'u_Weight',
             'u_BodyType',
-            'u_Gender',
             'u_Sign',
-            'u_Religion',
-            'u_SexualPrefrence',
             'u_Education',
             'u_Profession',
-            'u_Income',
-            'u_Intrest',
-            'u_MarriageStatus',
-            'u_Tatoos',
-            'u_TravaledPlaces',
-            'u_Triggers',
-            'u_AboutYou',
-            'u_AboutLatePerson',
-            'u_Image1',
-            'u_Image2',
-            'u_Image3',
-            'u_Image4'
+            'u_state_name',
+            'u_zip_code',
+            'u_city',
+            'u_InfluencerCode',
+            'u_IsSubscribed',
+            'u_latitude',
+            'u_longitude',
+            'connection_type_by_logged_user',
+            'connection_type_by_receiver_user',
         );
         $output_keys = array(
             'get_user_login_details',
         );
-        $ouput_aliases = array(
-            "get_user_login_details" => "get_user_personal_details",
-            "u_user_id" => "user_id",
-            'u_Smoke' => 'smoke',
-            'u_UploadDoc' => 'uploadDoc',
-            'u_Drink'=>'drink',
-            'u_420Friendly'=>'420friendly',
-            'u_Height'=>'height',
-            'u_Kids'=>'kids',
-            'u_BodyType'=>'bodytype',
-            'u_Gender'=>'gender',
-            'u_Sign'=>'sign',
-            'u_Religion'=>'religion',
-            'u_SexualPrefrence'=>'sexualprefrence',
-            'u_Education'=>'education',
-            'u_Profession'=>'profession',
-            'u_Income'=>'income',
-            'u_Intrest'=>'intrest',
-            'u_MarriageStatus'=>'marriagestatus',
-            'u_Tatoos'=>'tatoos',
-            'u_TravaledPlaces'=>'travaledplaces',
-            'u_Triggers'=>'triggers',
-            'u_AboutYou'=>'aboutyou',
-            'u_AboutLatePerson'=>'aboutlateperson',
-            'u_Image1'=> 'image1',
-            'u_Image2'=>'image2',
-            'u_Image3'=> 'image3',
-            'u_Image4'=>'image4',
-        );
+        $ouput_aliases = array();
 
         $output_array["settings"] = $setting_fields;
         $output_array["settings"]["fields"] = $output_fields;
@@ -369,7 +442,7 @@ class Get_user_details extends Cit_Controller
 
         $func_array["function"]["name"] = "user_profiles";
         $func_array["function"]["output_keys"] = $output_keys;
-        $func_array["function"]["output_alias"] = $ouput_aliases;
+       // $func_array["function"]["output_alias"] = $ouput_aliases;
         $func_array["function"]["single_keys"] = $this->single_keys;
         $func_array["function"]["multiple_keys"] = $this->multiple_keys;
 

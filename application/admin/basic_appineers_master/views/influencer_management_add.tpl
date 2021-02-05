@@ -19,7 +19,7 @@
                     <form name="frmaddupdate" id="frmaddupdate" action="<%$admin_url%><%$mod_enc_url['add_action']%>?<%$extra_qstr%>" method="post"  enctype="multipart/form-data">
                         <!-- Form Hidden Fields Unit -->
                         <input type="hidden" id="id" name="id" value="<%$enc_id%>" />
-                        <input type="hidden" id="mode" name="mode" value="<%$mod_enc_mode[$mode]%>" />
+                        <input type="hidden" id="mode" name="mode" value="<%$mod_enc_mode[$mode]%>" /> 
                         <input type="hidden" id="ctrl_prev_id" name="ctrl_prev_id" value="<%$next_prev_records['prev']['id']%>" />
                         <input type="hidden" id="ctrl_next_id" name="ctrl_next_id" value="<%$next_prev_records['next']['id']%>" />
                         <input type="hidden" id="draft_uniq_id" name="draft_uniq_id" value="<%$draft_uniq_id%>" />
@@ -35,7 +35,7 @@
                                     <div class="content <%$rl_theme_arr['frm_stand_label_align']%>">
                                         <div class="form-row row-fluid " id="cc_sh_i_influencer_image">
                                             <label class="form-label span3 ">
-                                                <%$form_config['i_influencer_image']['label_lang']%>
+                                                <%$form_config['i_influencer_image']['label_lang']%> 
                                             </label> 
                                             <div class="form-right-div  <%if $mode eq 'Update'%>frm-elements-div<%/if%> ">
                                                 
@@ -87,6 +87,18 @@
                                                 <div class="error-msg-form "><label class='error' id='i_influencer_nameErr'></label></div>
                                             </div>            
 
+                                            <%if $mod_enc_mode[$mode] eq 'Update'%>
+                                             <div class="form-row row-fluid " id="cc_sh_i_influencer_code">
+                                            <label class="form-label span3 ">
+                                                Influencer Code
+                                            </label> 
+                                            <div class="form-right-div  <%if $mode eq 'Update'%>frm-elements-div<%/if%> ">
+                                                
+                                                        <%$data['i_influencer_code']%>
+                                                </div>
+                                                <div class="error-msg-form "><label class='error' id='i_influencer_nameErr'></label></div>
+                                            </div>            
+                                            <%/if%>
                                           
                                             <div class="form-row row-fluid " id="cc_sh_i_influencer_status">
                                                 <label class="form-label span3 ">
@@ -98,6 +110,61 @@
                                                 </div>
                                                 <div class="error-msg-form "><label class='error' id='i_influencer_statuErr'></label></div>
                                             </div>
+
+                                            <%if $mod_enc_mode[$mode] eq 'Update'%>
+                                             <div class="form-row row-fluid " >
+                                                <label class="form-label span3 ">
+                                                    Select Year
+                                                </label> 
+                                                <div class="form-right-div  ">
+                                                     
+                                                     <%if $year_arr|@is_array && $year_arr|@count gt 0%>
+                                                        <select id="vYear" name="vYear" data-placeholder="Select year" class="chosen-select frm-size-large" onchange="showRevenue(this.value)">
+                                                        <option value="">Select year</option>
+
+                                                            <%section name="i" loop=$year_arr%>
+
+                                                            <option value="<%$year_arr[i]%>"><%$year_arr[i]%></option>
+                                                            <%/section%>
+                                                        </select>
+                                               
+                                                    <%/if%>
+
+
+                                                </div>
+                                                <div class="error-msg-form "><label class='error' ></label></div>
+                                            </div>
+
+
+                                              <div class="form-row row-fluid " >
+                                                <label class="form-label span3 ">
+                                                    Influencer Revenue
+                                                </label> 
+                                                <div class="form-right-div" >
+                                                   <div class="clear"></div>
+                                                <%if $revenew_arr|@is_array && $revenew_arr|@count gt 0%>
+                                                   
+                                                    <%foreach from=$revenew_arr item=loop1 key=key1 %>
+                                                   
+                                                   <div id="<%$key1%>" style="display:none" class="td">
+                                                    <%if $loop1|@is_array && $loop1|@count gt 0%>
+
+
+                                                        <%foreach from=$loop1 item=label key=key2 %>
+                                                        <%$revenew_arr.$key1.$key2.monthYear%> - $<%$revenew_arr.$key1.$key2.totalRevenew%> <br>
+                                                        <%/foreach%>
+
+                                                    <%/if%>
+                                                    </div>
+                                                    <br> 
+                                                    <%/foreach%>
+                                                    
+                                                    <%/if%>
+                                                </div>
+                                                <div class="error-msg-form "><label class='error' id='i_influencer_statuErr'></label></div>
+                                            </div>
+                                            <%/if%>
+                                            
                                         </div>
                                     </div>
                                 </div>
@@ -159,6 +226,28 @@
     };
     
     callSwitchToSelf();
+var divState = {};
+    function showRevenue(id)
+    {
+
+         if (document.getElementById) {
+                var divid = document.getElementById(id);
+
+                    divState[id] = (divState[id]) ? false : true; // initialize / invert status (true is visible and false is closed)
+                //close others
+                for (var div in divState){
+                    if (divState[div] && div != id){ // ignore closed ones and the current
+                        document.getElementById(div).style.display = 'none'; // hide
+                        divState[div] = false; // reset status
+                    }
+                }
+                divid.style.display = (divid.style.display == 'block' ? 'none' : 'block');
+                
+                
+            }
+        
+    }
+
 <%/javascript%>
 <%$this->js->add_js('admin/influencer_management_add_js.js')%>
 <%if $this->input->is_ajax_request()%>

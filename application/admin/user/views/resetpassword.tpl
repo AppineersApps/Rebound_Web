@@ -36,7 +36,7 @@
                 <div class="clear"></div>
                 <div class="error-msg login-error-msg" id='securitycodeErr'></div>
                 <div class="reset-button-div">
-                    <input type="submit" class="btn btn-info right"  value="Reset Password" onclick="return resetpassword();">
+                    <input style="width:200px;" type="submit" class="btn btn-info right"  value="Reset Password" onclick="return resetpassword();">
                 </div>
             </form>
         </div>

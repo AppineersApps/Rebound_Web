@@ -76,8 +76,19 @@ class Connections extends Cit_Controller
             $output_response =  $this->get_connection_detail($request_arr);
           break;
         case 'POST':
+
+    
+        if($request_arr['connection_type']=='undo')
+        {
+
+           $output_response =  $this->undo_connection($request_arr);
+            break;
+
+        }else
+        {
             $output_response =  $this->add_connection_status($request_arr);
             break;
+        }          
         case 'PUT':
             // $output_response =  $this->update_technique_status($request_arr);
             break;
@@ -198,16 +209,14 @@ class Connections extends Cit_Controller
                 { 
 
                     $data = $data_arr["user_image"];
-                    $image_arr = array();
-                    $image_arr["image_name"] = $data;
-                    $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
-                    $image_arr["color"] = "FFFFFF";
-                    $image_arr["no_img"] = FALSE;
-                    $image_arr["path"] = "fern/user_profile";
-                   // $image_arr["path"] = $this->general->getImageNestedFolders($dest_path);
-                    $data = $this->general->get_image_aws($image_arr);
-
-                    $result_arr[$data_key]["user_image"] = $data;
+                        $image_arr = array();
+                        $image_arr["image_name"] = $data;
+                        $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
+                        $image_arr["color"] = "FFFFFF";
+                        $image_arr["no_img"] = FALSE;
+                        $image_arr["path"] = "rebound/user_profile";
+                        $data = $this->general->get_image_aws($image_arr);
+                        $result_arr[$data_key]["user_image"] = $data;
 
                     $i++;
                 }
@@ -624,6 +633,84 @@ class Connections extends Cit_Controller
     }
 
 
+
+
+    /**
+     * start_block_user method is used to initiate api execution flow.
+     * @created Chetan Dvs | 13.05.2019
+     * @modified Mangal Rathore | 21.06.2019
+     * @param array $request_arr request_arr array is used for api input.
+     * @param bool $inner_api inner_api flag is used to idetify whether it is inner api request or general request.
+     * @return array $output_response returns output response of API.
+     */
+        public function undo_connection($input)
+     {
+        try
+        {
+
+            $validation_res = $this->rules_add_connection_status($input);
+            if ($validation_res["success"] == "-5")
+            {
+                if ($inner_api === TRUE)
+                {
+                    return $validation_res;
+                }
+                else
+                {
+                    $this->wsresponse->sendValidationResponse($validation_res);
+                }
+            }
+                  
+            $output_response = array();
+            $input_params = $validation_res['input_params'];
+            $output_array = $func_array = array();
+            $input_params = $this->delete_like_and_dislike($input_params);
+
+           if($input_params['affected_rows']==1)
+           {     
+            $output_response = $this->undo_user_connection_finish_success($input_params);
+           return $output_response;
+           }else
+           {
+            $output_response = $this->undo_user_connection_finish_success_1($input_params);
+               return $output_response;
+
+           }
+          
+        }
+        catch(Exception $e)
+        {
+            $message = $e->getMessage();
+        }
+        return $output_response;
+    }
+
+     public function delete_like_and_dislike($input_params = array())
+    {
+
+        $this->block_result = array();
+        try
+        {
+
+            $user_id = isset($input_params["user_id"]) ? $input_params["user_id"] : "";
+            $connection_user_id = isset($input_params["connection_user_id"]) ? $input_params["connection_user_id"] : "";
+            $this->block_result = $this->connections_model->delete_like_and_dislike($user_id, $connection_user_id);
+        }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $this->block_result["data"] = array();
+        }
+        $input_params["delete_like_and_dislike"] = $this->block_result["data"];
+        $input_params = $this->wsresponse->assignSingleRecord($input_params, $this->block_result["data"]);
+
+        return $input_params;
+    }
+
+
+
+
+
     /**
      * notification_entry method is used to process query block.
      * @created Devangi Nirmal | 05.06.2019
@@ -680,7 +767,7 @@ class Connections extends Cit_Controller
 
             $device_id = $input_params["u_device_token"];
             $code = "USER";
-            $sound = "";
+            $sound = "default";
             $badge = "";
             $title = "";
             $send_vars = array(
@@ -823,18 +910,12 @@ class Connections extends Cit_Controller
 
             $input_params = $this->get_liked_user_details($input_params);
 
-             $input_params = $this->check_eligibility_of_liking($input_params);
+             //$input_params = $this->check_eligibility_of_liking($input_params);
 
-            
-           // $input_params = $this->get_match_user($input_params);
-            //echo count($input_params['get_match_user']);
-            //exit;
+ 			$input_params = $this->check_eligibility_of_logedin_user($input_params);
+ 		   $condition_res = $this->condition_3($input_params);
 
-
-
-            if($input_params['u_is_subscribed']==1){
-
-              
+           if($condition_res["success"]){
 
                         $condition_res = $this->condition_1($input_params);
 
@@ -852,164 +933,21 @@ class Connections extends Cit_Controller
 
                                 $input_params = $this->set_connection_status($input_params);
 
+                           
+
                                 $input_params = $this->get_user_device_token($input_params);
 
                                 
                                 $input_params = $this->get_users_list_details($input_params);
 
                                 //check match user condition like and like or superlike and like or like and Superlike
-                                        if((($input_params['connection_type_by_logged_user']=='Like') && ($input_params['connection_type_by_receiver_user']=='Like')) OR (($input_params['connection_type_by_logged_user']=='Superlike') && ($input_params['connection_type_by_receiver_user']=='Like')) OR (($input_params['connection_type_by_logged_user']=='Like') && ($input_params['connection_type_by_receiver_user']=='Superlike')) OR (($input_params['connection_type_by_logged_user']=='Superlike') && ($input_params['connection_type_by_receiver_user']=='Superlike')))
-                                        {
-
-                                            $input_params = $this->entry_for_match($input_params);
-
-                                            
-                                            if ($input_params["u_device_token"]!=''){
-
-                                               
-                                                $input_params = $this->push_notification_1($input_params);
-                                                $output_response = $this->connection_add_finish_success($input_params);
-                                               return $output_response;
-                                            }else{
-                                            $output_response = $this->connection_add_finish_success_2($input_params);
-                                                return $output_response;
-                                            }
-
-                                        }
-                                        else
-                                        {
-
-
-             
-                                           if (($input_params["connection_type"]=='Like') OR ($input_params["connection_type"]=='Superlike'))
-                                            {
-
-                                                    if ($input_params["u_device_token"]!=''){ 
-
-
-                                                    $input_params = $this->notification_entry($input_params);
-
-                                                    if($input_params['u_is_subscribed_1']==1){
-                                                    $input_params = $this->push_notification($input_params);
-                                                    }
-                                                    
-                                                    $output_response = $this->connection_add_finish_success($input_params);
-                                                     return $output_response;
-                                                    }else
-                                                    {
-                                                         $output_response = $this->connection_add_finish_success_2($input_params);
-                                                                    return $output_response;
-                                                    }
-
-                                            }
-
-                                            else
-                                            {
-
-                                                $output_response = $this->connection_add_finish_success($input_params);
-                                                                return $output_response;
-                                            }
-
-                                        }
-                              
-
-                                   }else
-                                   {
-
-                                     $output_response = $this->connection_add_finish_success_1($input_params);
-                                     return $output_response;
-                                   }     
-                        }
-                         else
-                        {
-
-                            $output_response = $this->connection_add_finish_success_1($input_params);
-                            return $output_response;
-                        }                
-
-
-            }else  //end loged in user if issubscribe
-            {
-
-
-
-               $input_params = $this->get_match_user($input_params);
-
-               if(count($input_params['get_match_user'])<=2)
-                {
-
-
-
-
-      
-
-                    $condition_res = $this->condition_1($input_params);
-
-
-
-                         if ($condition_res["success"])
-                        {
-
-
-                            $input_params = $this->check_eligibility_of_liking($input_params);
-
-                            $condition_res = $this->condition_2($input_params);
-
-
-
-                            if ($condition_res["success"])
-                            {
-
-
-
-
-                                $input_params = $this->delete_record($input_params);
-
-                                $input_params = $this->set_connection_status($input_params);
-
-
-                                
-
-                                $input_params = $this->get_user_device_token($input_params);
-
-
-
-
-
-                                
-                                $input_params = $this->get_users_list_details($input_params);
-
-                        
-
-                                //check match user condition like and like or superlike and like or like and Superlike
-                                        if((($input_params['connection_type_by_logged_user']=='Like') && ($input_params['connection_type_by_receiver_user']=='Like')) OR (($input_params['connection_type_by_logged_user']=='Superlike')))
-                                        {
-
-                                            $input_params = $this->entry_for_match($input_params);
-
-                                            
-                                            if ($input_params["u_device_token"]!=''){
-
-                                               
-                                                $input_params = $this->push_notification_1($input_params);
-                                                $output_response = $this->connection_add_finish_success($input_params);
-                                               return $output_response;
-                                            }else{
-                                            $output_response = $this->connection_add_finish_success_2($input_params);
-                                                return $output_response;
-                                            }
-
-                                        }
-                                        else
-                                        {
-
-
+                             
              
                                            if (($input_params["connection_type"]=='Like'))
                                             {
-                                              
-
+                                            	     $input_params = $this->like_count_management($input_params);
                                                     if ($input_params["u_device_token"]!=''){ 
+
 
 
                                                     $input_params = $this->notification_entry($input_params);
@@ -1031,13 +969,11 @@ class Connections extends Cit_Controller
                                             else
                                             {
 
-
-
                                                 $output_response = $this->connection_add_finish_success($input_params);
                                                                 return $output_response;
                                             }
 
-                                        }
+                                        //}
                               
 
                                    }else
@@ -1052,33 +988,115 @@ class Connections extends Cit_Controller
 
                             $output_response = $this->connection_add_finish_success_1($input_params);
                             return $output_response;
-                        }   
-                    
+                        } 
 
 
-                }else
-                {
+                  }else{
 
-                    
-
-                      $output_response = $this->connection_add_finish_success_4($input_params);
-                            return $output_response;
-
-                      
-                }//end mathc if
+  					 $output_response = $this->connection_finish_success_4($input_params);
+                    return $output_response;
 
 
-
-            }
-
-            
-           
+                  }                     
         }
         catch(Exception $e)
         {
             $message = $e->getMessage();
         }
         return $output_response;
+    }
+
+
+    public function check_eligibility_of_logedin_user($input_params = array())
+    {
+
+        $this->block_result = array();
+        try
+        {
+
+            $user_id = isset($input_params["user_id"]) ? $input_params["user_id"] : "";
+            $this->block_result = $this->users_model->check_eligibility_of_logedin_user($user_id);
+            if (!$this->block_result["success"])
+            {
+                throw new Exception("No records found.");
+            }
+        }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $this->block_result["data"] = array();
+        }
+        $input_params["check_eligibility_of_logedin_user"] = $this->block_result["data"];
+        $input_params = $this->wsresponse->assignSingleRecord($input_params, $this->block_result["data"]);
+
+        return $input_params;
+    }
+
+
+    public function condition_3($input_params = array())
+    {
+
+        $this->block_result = array();
+        try
+        {
+
+            $cc_lo_0 = $input_params["u_is_subscribed"];
+            $cc_ro_0 = 1;
+
+            $cc_fr_0 = ($cc_lo_0 == $cc_ro_0) ? TRUE : FALSE;
+
+            $cc_lo_2 = $input_params["connection_type"];
+            $cc_ro_2 = 'Dislike';
+
+            $cc_fr_2 = ($cc_lo_2 == $cc_ro_2) ? TRUE : FALSE;
+
+            $cc_lo_1 = $input_params["u_likes_per_day"];
+            $cc_ro_1 = 15;
+
+            $cc_fr_1 = ($cc_lo_1 < $cc_ro_1) ? TRUE : FALSE;
+            if (!($cc_fr_0 || $cc_fr_1|| $cc_fr_2))
+            {
+                throw new Exception("Some conditions does not match.");
+            }
+            $success = 1;
+            $message = "Conditions matched.";
+        }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $message = $e->getMessage();
+        }
+        $this->block_result["success"] = $success;
+        $this->block_result["message"] = $message;
+        return $this->block_result;
+    }
+
+
+     public function like_count_management($input_params = array())
+    {
+
+        $this->block_result = array();
+        try
+        {
+
+
+            $params_arr = $where_arr = array();
+            if (isset($input_params["user_id"]))
+            {
+                $where_arr["u_users_id_1"] = $input_params["user_id"];
+            }
+            $params_arr["u_likes_per_day"] = "".$input_params["u_likes_per_day"]." +1";
+            $this->block_result = $this->users_model->like_count_management($params_arr, $where_arr);
+        }
+        catch(Exception $e)
+        {
+            $success = 0;
+            $this->block_result["data"] = array();
+        }
+        $input_params["like_count_management"] = $this->block_result["data"];
+        $input_params = $this->wsresponse->assignSingleRecord($input_params, $this->block_result["data"]);
+
+        return $input_params;
     }
   
 
@@ -1477,7 +1495,7 @@ class Connections extends Cit_Controller
 
         $setting_fields = array(
             "success" => "1",
-            "message" => "connection_add_finish_success_2",
+            "message" => "connection added successfully",
         );
         $output_fields = array();
 
@@ -1680,6 +1698,88 @@ class Connections extends Cit_Controller
         $output_array["data"] = $input_params;
 
         $func_array["function"]["name"] = "get_connection_detail";
+        $func_array["function"]["multiple_keys"] = $this->multiple_keys;
+
+        $this->wsresponse->setResponseStatus(200);
+
+        $responce_arr = $this->wsresponse->outputResponse($output_array, $func_array);
+
+        return $responce_arr;
+    }
+
+
+     public function undo_user_connection_finish_success($input_params = array())
+    {
+       
+        $setting_fields = array(
+            "success" => "1",
+            "message" => "undo_user_connection_finish_success",
+        );
+       
+        $output_keys = array(
+            'undo_connection',
+        );
+
+        $output_array["settings"] = array_merge($this->settings_params, $setting_fields);
+        $output_array["settings"]["fields"] = $output_fields;
+        $output_array["data"] = $input_params;
+
+        $func_array["function"]["name"] = "undo_connection";
+        $func_array["function"]["output_keys"] = $output_keys;
+        $func_array["function"]["single_keys"] = $this->single_keys;
+        $func_array["function"]["multiple_keys"] = $this->multiple_keys;
+
+        $this->wsresponse->setResponseStatus(200);
+
+        $responce_arr = $this->wsresponse->outputResponse($output_array, $func_array);
+
+       // print_r( $responce_arr );
+        //exit;
+
+        return $responce_arr;
+    }
+
+
+
+    public function undo_user_connection_finish_success_1($input_params = array())
+    {
+
+        $setting_fields = array(
+            "success" => "0",
+            "message" => "undo_user_connection_finish_success_1",
+        );
+        $output_fields = array();
+
+        $output_array["settings"] = $setting_fields;
+        $output_array["settings"]["fields"] = $output_fields;
+        $output_array["data"] = $input_params;
+
+        $func_array["function"]["name"] = "undo_connection";
+        $func_array["function"]["multiple_keys"] = $this->multiple_keys;
+
+        $this->wsresponse->setResponseStatus(200);
+
+        $responce_arr = $this->wsresponse->outputResponse($output_array, $func_array);
+
+        return $responce_arr;
+    }
+
+
+     public function connection_finish_success_4($input_params = array())
+    {
+
+        $setting_fields = array(
+            "success" => "0",
+            "message" => "connection_finish_success_4",
+        );
+        $output_fields = array();
+
+        $output_array["settings"] = $setting_fields;
+        $output_array["settings"]["fields"] = $output_fields;
+        $output_array["data"] = $input_params;
+
+        $func_array["function"]["name"] = "add_connection_status";
+        $func_array["function"]["single_keys"] = $this->single_keys;
         $func_array["function"]["multiple_keys"] = $this->multiple_keys;
 
         $this->wsresponse->setResponseStatus(200);

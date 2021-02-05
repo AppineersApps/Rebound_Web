@@ -92,8 +92,9 @@ class Notification extends Cit_Controller
 
             return  $output_response;
             break;
+
          case 'DELETE':
-            //print_r($request_arr);exit;
+           // print_r($request_arr);exit;
             $output_response =  $this->delete_notification($request_arr);
 
             return  $output_response;
@@ -255,7 +256,7 @@ class Notification extends Cit_Controller
                     $image_arr["ext"] = implode(",", $this->config->item("IMAGE_EXTENSION_ARR"));
                     $image_arr["color"] = "FFFFFF";
                     $image_arr["no_img"] = FALSE;
-                    $image_arr["path"] = "widsconnect/user_profile";
+                    $image_arr["path"] = "rebound/user_profile";
                     $data = $this->general->get_image_aws($image_arr);
                     $result_arr[$data_key]["user_image"] = $data;
 
@@ -313,20 +314,20 @@ class Notification extends Cit_Controller
 
  	          $arrCondition = $this->check_notification_exist($input_params);
 
-            if (false == empty($arrCondition["checknotificationtatus"]["status"]))
-            {
+                if (false == empty($arrCondition["checknotificationtatus"]["status"]))
+                {
                
 		          $input_params = $this->delete_all_notification($request_arr);
-               if ($input_params["affected_rows"])
-                {
-                    $output_response = $this->delete_notification_finish_success($input_params);
-                    return $output_response;
-                }else{
+                   if ($input_params["affected_rows"])
+                    {
+                        $output_response = $this->delete_notification_finish_success($input_params);
+                        return $output_response;
+                    }else{
 
 
-                    $output_response = $this->delete_notification_finish_success_1($input_params);
-                    return $output_response;
-                }
+                        $output_response = $this->delete_notification_finish_success_1($input_params);
+                        return $output_response;
+                    }
 		        }else
 		        {
 
@@ -401,7 +402,6 @@ class Notification extends Cit_Controller
             'message',
             'notification_user_id',
             'notification_date',
-            'app_section',
             'user_name',
             'user_image',
             'request_id',
